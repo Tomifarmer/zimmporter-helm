@@ -1,0 +1,148 @@
+# ── Global ──────────────────────────────────────────────────────────
+nameOverride: ""
+fullnameOverride: ""
+
+# ── Image settings ──────────────────────────────────────────────────
+images:
+  api:
+    repository: ""            # e.g. your-registry/zimmporter-api
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  frontend:
+    repository: ""            # e.g. your-registry/zimmporter-front
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+# ── Ingress ─────────────────────────────────────────────────────────
+ingress:
+  api:
+    enabled: false
+    host: api.example.com
+    className: ""
+    annotations: {}
+    tls: []
+      # - hosts:
+      #     - api.example.com
+      #   secretName: api-tls
+  frontend:
+    enabled: false
+    host: app.example.com
+    className: ""
+    annotations: {}
+    tls: []
+      # - hosts:
+      #     - app.example.com
+      #   secretName: frontend-tls
+
+# ── API (FastAPI) ───────────────────────────────────────────────────
+api:
+  replicas: 1
+  resources: {}
+    # limits:
+    #   cpu: 500m
+    #   memory: 512Mi
+    # requests:
+    #   cpu: 250m
+    #   memory: 256Mi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  env:
+    REQUIRE_AUTH: "false"
+    CORS_ALLOWED_ORIGINS: "*"
+
+# ── Celery Worker ───────────────────────────────────────────────────
+worker:
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  concurrency: 4
+  pool: prefork
+  env:
+    PYTHONWARNINGS: "ignore::celery.platforms.SecurityWarning"
+
+# ── Frontend (Next.js) ──────────────────────────────────────────────
+frontend:
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  env:
+    NEXT_PUBLIC_API_URL: "http://api:8000"
+
+# ── External MinIO ──────────────────────────────────────────────────
+minio:
+  endpoint: ""
+  accessKey: ""
+  secretKey: ""
+  bucket: ""
+  useSSL: false
+
+# ── MariaDB ─────────────────────────────────────────────────────────
+mariadb:
+  image: mariadb:11
+  external:
+    enabled: false
+    host: ""
+    port: 3306
+  storageClass: ""
+  persistence:
+    size: 10Gi
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# ── Valkey ──────────────────────────────────────────────────────────
+valkey:
+  image: valkey/valkey:latest
+  external:
+    enabled: false
+    address: ""
+    port: 6379
+  storageClass: ""
+  persistence:
+    size: 1Gi
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# ── Celery broker/backend (overrides auto-derived defaults) ─────────
+celery:
+  broker: ""
+  backend: ""
+
+# ── Database credentials ────────────────────────────────────────────
+database:
+  host: ""
+  port: ""
+  rootPassword: ""
+  user: zimmporter
+  password: ""
+  name: zimmporter
+  # Reference an existing Secret instead of generating one.
+  # The secret must contain keys matching existingSecretKeyMapping below.
+  existingSecret: ""
+  existingSecretKeyMapping:
+    rootPassword: root-password
+    user: user
+    password: password
+    name: name
+
+# ── Authentication ──────────────────────────────────────────────────
+auth:
+  apiKey: ""
+  # Reference an existing Secret instead of generating one.
+  existingSecret: ""
+  existingSecretKey: api-key
+
+# ── Private CA certificate ──────────────────────────────────────────
+caCert:
+  enabled: false
+  path: /etc/ssl/certs/ca.crt
+  existingSecret: ""
+  key: ca.crt

@@ -96,6 +96,7 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | Name | Default | Description |
 |---|---|---|
 | `api.replicas` | `1` | Number of API pods |
+| `api.podSecurityContext` | `{fsGroup: 51000}` | Pod-level security context |
 | `api.resources` | `{}` | Container resource limits/requests |
 | `api.nodeSelector` | `{}` | Node selector |
 | `api.tolerations` | `[]` | Pod tolerations |
@@ -108,13 +109,14 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | Name | Default | Description |
 |---|---|---|
 | `worker.replicas` | `1` | Number of worker pods |
+| `worker.podSecurityContext` | `{fsGroup: 51000}` | Pod-level security context |
 | `worker.resources` | `{}` | Container resource limits/requests |
 | `worker.concurrency` | `4` | Celery worker concurrency |
 | `worker.pool` | `"prefork"` | Celery worker pool type |
 | `worker.nodeSelector` | `{}` | Node selector |
 | `worker.tolerations` | `[]` | Pod tolerations |
 | `worker.affinity` | `{}` | Pod affinity/anti-affinity |
-| `worker.env.PYTHONWARNINGS` | `"ignore::celery.platforms.SecurityWarning"` | Python warnings filter |
+
 
 ### Frontend
 

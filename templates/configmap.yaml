@@ -30,7 +30,6 @@ data:
   CELERY_BACKEND: {{ include "zimmporter.celeryBackend" . | quote }}
   MINIO_ENDPOINT: {{ .Values.minio.endpoint | quote }}
   MINIO_USE_SSL: {{ .Values.minio.useSSL | toString | quote }}
-  PYTHONWARNINGS: {{ .Values.worker.env.PYTHONWARNINGS | quote }}
 {{- if .Values.caCert.enabled }}
   CA_CERT: {{ .Values.caCert.path | quote }}
 {{- end }}

@@ -44,6 +44,8 @@ api:
     # requests:
     #   cpu: 250m
     #   memory: 256Mi
+  podSecurityContext:
+    fsGroup: 51000
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -55,13 +57,14 @@ api:
 worker:
   replicas: 1
   resources: {}
+  podSecurityContext:
+    fsGroup: 51000
   nodeSelector: {}
   tolerations: []
   affinity: {}
   concurrency: 4
   pool: prefork
-  env:
-    PYTHONWARNINGS: "ignore::celery.platforms.SecurityWarning"
+  env: {}
 
 # ── Frontend (Next.js) ──────────────────────────────────────────────
 frontend:

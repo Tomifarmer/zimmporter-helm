@@ -80,6 +80,10 @@ app.kubernetes.io/component: mariadb
 {{- .Values.database.port | default ( .Values.mariadb.external.port | toString ) | default "3306" }}
 {{- end }}
 
+{{- define "zimmporter.apiInternalUrl" -}}
+{{- printf "http://%s-api:8000" (include "zimmporter.fullname" .) }}
+{{- end }}
+
 {{- define "zimmporter.valkeyAddress" -}}
 {{- .Values.valkey.external.address | default (printf "%s-valkey" (include "zimmporter.fullname" .)) }}
 {{- end }}

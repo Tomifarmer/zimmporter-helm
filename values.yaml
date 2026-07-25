@@ -55,6 +55,7 @@ api:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  initImage: busybox:1.36
   initSecurityContext:
     runAsNonRoot: false
     runAsUser: 0
@@ -81,6 +82,7 @@ worker:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  initImage: busybox:1.36
   initSecurityContext:
     runAsNonRoot: false
     runAsUser: 0
@@ -99,7 +101,7 @@ frontend:
   tolerations: []
   affinity: {}
   env:
-    NEXT_PUBLIC_API_URL: "http://api:8000"
+    NEXT_PUBLIC_API_URL: ""
 
 # ── External S3-compatible storage ──────────────────────────────────
 s3:

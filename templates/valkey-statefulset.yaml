@@ -21,6 +21,12 @@ spec:
         - name: valkey
           image: "{{ .Values.valkey.image }}"
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - containerPort: 6379
               name: redis

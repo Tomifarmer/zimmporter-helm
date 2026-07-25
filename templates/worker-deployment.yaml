@@ -19,14 +19,22 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.images.api.pullSecret }}
+      {{- with .Values.images.worker.pullSecret }}
       imagePullSecrets:
         - name: {{ . }}
       {{- end }}
       containers:
         - name: worker
-          image: "{{ .Values.images.api.repository }}:{{ .Values.images.api.tag }}"
-          imagePullPolicy: {{ .Values.images.api.pullPolicy }}
+          image: "{{ .Values.images.worker.repository }}:{{ .Values.images.worker.tag }}"
+          imagePullPolicy: {{ .Values.images.worker.pullPolicy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 51000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
           command:
             - celery
             - -A

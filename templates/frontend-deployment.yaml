@@ -23,6 +23,15 @@ spec:
         - name: frontend
           image: "{{ .Values.images.frontend.repository }}:{{ .Values.images.frontend.tag }}"
           imagePullPolicy: {{ .Values.images.frontend.pullPolicy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 51010
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - containerPort: 3000
               name: http

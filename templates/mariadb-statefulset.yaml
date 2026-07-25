@@ -21,6 +21,12 @@ spec:
         - name: mariadb
           image: "{{ .Values.mariadb.image }}"
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - containerPort: 3306
               name: mysql

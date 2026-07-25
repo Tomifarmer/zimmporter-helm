@@ -1,7 +1,8 @@
 # ── Global ──────────────────────────────────────────────────────────
 nameOverride: ""
 fullnameOverride: ""
-imagePullPolicy: ""
+global:
+  imagePullPolicy: ""
 
 # ── Image settings ──────────────────────────────────────────────────
 images:

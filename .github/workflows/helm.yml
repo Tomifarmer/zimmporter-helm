@@ -35,6 +35,9 @@ jobs:
             echo "app_version=${AV}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Lowercase owner
+        run: echo "OWNER_LOWER=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
+
       - name: Login to GHCR
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | \
@@ -45,4 +48,4 @@ jobs:
           helm package . \
             --version "${{ steps.version.outputs.version }}" \
             --app-version "${{ steps.version.outputs.app_version }}"
-          helm push zimmporter-*.tgz oci://ghcr.io/${{ github.repository_owner }}
+          helm push zimmporter-*.tgz oci://ghcr.io/${{ env.OWNER_LOWER }}

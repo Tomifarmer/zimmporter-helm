@@ -43,7 +43,7 @@ spec:
             - configMapRef:
                 name: {{ include "zimmporter.fullname" . }}-frontend-config
           env:
-            - name: NEXT_PUBLIC_API_KEY
+            - name: API_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ include "zimmporter.authSecretName" . }}

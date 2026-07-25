@@ -101,7 +101,7 @@ frontend:
   tolerations: []
   affinity: {}
   env:
-    NEXT_PUBLIC_API_URL: ""
+    API_URL: ""
 
 # ── External S3-compatible storage ──────────────────────────────────
 s3:

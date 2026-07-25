@@ -38,6 +38,12 @@ jobs:
       - name: Lowercase owner
         run: echo "OWNER_LOWER=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
 
+      - name: Lint chart
+        run: helm lint .
+
+      - name: Template chart
+        run: helm template . --debug
+
       - name: Login to GHCR
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | \

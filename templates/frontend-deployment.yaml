@@ -15,6 +15,10 @@ spec:
       labels:
         {{- include "zimmporter.frontendSelectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.frontend.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.images.frontend.pullSecret }}
       imagePullSecrets:
         - name: {{ . }}

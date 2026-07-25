@@ -74,6 +74,8 @@ worker:
 frontend:
   replicas: 1
   resources: {}
+  podSecurityContext:
+    runAsNonRoot: true
   nodeSelector: {}
   tolerations: []
   affinity: {}

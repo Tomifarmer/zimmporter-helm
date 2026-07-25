@@ -1,0 +1,48 @@
+name: Publish Helm Chart
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Derive version
+        id: version
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            TAG="${{ github.ref_name }}"
+            VER="${TAG#v}"
+            echo "version=${VER}" >> "$GITHUB_OUTPUT"
+            echo "app_version=${VER}" >> "$GITHUB_OUTPUT"
+          else
+            VER=$(grep '^version:' Chart.yaml | awk '{print $2}')
+            AV=$(grep '^appVersion:' Chart.yaml | awk '{print $2}' | tr -d '"')
+            echo "version=${VER}" >> "$GITHUB_OUTPUT"
+            echo "app_version=${AV}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Login to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | \
+            helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Package and push
+        run: |
+          helm package . \
+            --version "${{ steps.version.outputs.version }}" \
+            --app-version "${{ steps.version.outputs.app_version }}"
+          helm push zimmporter-*.tgz oci://ghcr.io/${{ github.repository_owner }}

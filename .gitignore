@@ -1,0 +1,13 @@
+# Helm
+*.tgz
+charts/
+
+# IDE
+.idea/
+
+# OS
+.DS_Store
+*.swp
+*.bak
+*.tmp
+*.orig

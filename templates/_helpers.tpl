@@ -73,7 +73,7 @@ app.kubernetes.io/component: mariadb
 {{- end }}
 
 {{- define "zimmporter.dbHost" -}}
-{{- .Values.database.host | default .Values.mariadb.external.host | default "mariadb" }}
+{{- .Values.database.host | default .Values.mariadb.external.host | default (printf "%s-mariadb" (include "zimmporter.fullname" .)) }}
 {{- end }}
 
 {{- define "zimmporter.dbPort" -}}

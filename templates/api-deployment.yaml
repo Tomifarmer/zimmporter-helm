@@ -49,20 +49,20 @@ spec:
                 secretKeyRef:
                   name: {{ include "zimmporter.databaseSecretName" . }}
                   key: {{ .Values.database.existingSecretKeyMapping.name }}
-            - name: MINIO_ACCESS_KEY
+            - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "zimmporter.fullname" . }}-minio
+                  name: {{ include "zimmporter.fullname" . }}-s3
                   key: access-key
-            - name: MINIO_SECRET_KEY
+            - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "zimmporter.fullname" . }}-minio
+                  name: {{ include "zimmporter.fullname" . }}-s3
                   key: secret-key
-            - name: MINIO_BUCKET
+            - name: AWS_BUCKET
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "zimmporter.fullname" . }}-minio
+                  name: {{ include "zimmporter.fullname" . }}-s3
                   key: bucket
             - name: API_KEY
               valueFrom:

@@ -9,8 +9,8 @@ data:
   DB_PORT: {{ include "zimmporter.dbPort" . | quote }}
   CELERY_BROKER: {{ include "zimmporter.celeryBroker" . | quote }}
   CELERY_BACKEND: {{ include "zimmporter.celeryBackend" . | quote }}
-  MINIO_ENDPOINT: {{ .Values.minio.endpoint | quote }}
-  MINIO_USE_SSL: {{ .Values.minio.useSSL | toString | quote }}
+  AWS_ENDPOINT_URL: {{ .Values.s3.endpoint | quote }}
+  AWS_USE_SSL: {{ .Values.s3.useSSL | toString | quote }}
   REQUIRE_AUTH: {{ .Values.api.env.REQUIRE_AUTH | quote }}
   CORS_ALLOWED_ORIGINS: {{ .Values.api.env.CORS_ALLOWED_ORIGINS | quote }}
 {{- if .Values.caCert.enabled }}
@@ -28,8 +28,8 @@ data:
   DB_PORT: {{ include "zimmporter.dbPort" . | quote }}
   CELERY_BROKER: {{ include "zimmporter.celeryBroker" . | quote }}
   CELERY_BACKEND: {{ include "zimmporter.celeryBackend" . | quote }}
-  MINIO_ENDPOINT: {{ .Values.minio.endpoint | quote }}
-  MINIO_USE_SSL: {{ .Values.minio.useSSL | toString | quote }}
+  AWS_ENDPOINT_URL: {{ .Values.s3.endpoint | quote }}
+  AWS_USE_SSL: {{ .Values.s3.useSSL | toString | quote }}
 {{- if .Values.caCert.enabled }}
   CA_CERT: {{ .Values.caCert.path | quote }}
 {{- end }}

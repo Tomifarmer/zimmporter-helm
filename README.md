@@ -10,7 +10,7 @@ Deploys the Zimmporter stack on Kubernetes:
 | **valkey** | Redis-compatible KV store — Celery broker & result backend |
 | **mariadb** | SQL database — job and song metadata |
 
-MinIO (S3-compatible object storage) is expected to be pre-provisioned
+S3-compatible object storage is expected to be pre-provisioned
 and configured via values — it is **not** deployed by this chart.
 
 ---
@@ -20,7 +20,7 @@ and configured via values — it is **not** deployed by this chart.
 - Kubernetes 1.25+
 - Helm 3.8+
 - A default `StorageClass` (or set one explicitly for Valkey / MariaDB)
-- A MinIO instance reachable from the cluster (or equivalent S3 service)
+- An S3-compatible instance reachable from the cluster
 
 ---
 
@@ -31,10 +31,10 @@ and configured via values — it is **not** deployed by this chart.
 helm install my-release ./ \
   --set images.api.repository=myregistry/zimmporter-api \
   --set images.frontend.repository=myregistry/zimmporter-front \
-  --set minio.endpoint=minio.example.com:9000 \
-  --set minio.accessKey=myAccessKey \
-  --set minio.secretKey=mySecretKey \
-  --set minio.bucket=myBucket \
+  --set s3.endpoint=s3.example.com:9000 \
+  --set s3.accessKeyId=myAccessKey \
+  --set s3.secretAccessKey=mySecretKey \
+  --set s3.bucket=myBucket \
   --set database.rootPassword=strongRootPw \
   --set database.password=strongUserPw
 ```
@@ -129,15 +129,15 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `frontend.affinity` | `{}` | Pod affinity/anti-affinity |
 | `frontend.env.NEXT_PUBLIC_API_URL` | `"http://api:8000"` | Backend API URL (in-cluster) |
 
-### MinIO (external)
+### S3 (external)
 
 | Name | Default | Description |
 |---|---|---|
-| `minio.endpoint` | `""` | MinIO server host:port |
-| `minio.accessKey` | `""` | MinIO access key |
-| `minio.secretKey` | `""` | MinIO secret key |
-| `minio.bucket` | `""` | MinIO bucket name |
-| `minio.useSSL` | `false` | Use HTTPS for MinIO connections |
+| `s3.endpoint` | `""` | S3 endpoint host:port |
+| `s3.accessKeyId` | `""` | S3 access key ID |
+| `s3.secretAccessKey` | `""` | S3 secret access key |
+| `s3.bucket` | `""` | S3 bucket name |
+| `s3.useSSL` | `false` | Use HTTPS for S3 connections |
 
 ### MariaDB
 
@@ -218,7 +218,7 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `Ingress` (×2) | Only when enabled | Separate hostnames for API and frontend |
 | `ConfigMap` (×3) | `*-api-config`, `*-worker-config`, `*-frontend-config` | Non-sensitive environment variables |
 | `Secret` (conditional) | `*-database` | Skipped when `database.existingSecret` is set |
-| `Secret` | `*-minio` | Always created |
+| `Secret` | `*-s3` | Always created |
 | `Secret` (conditional) | `*-api-auth` | Skipped when `auth.existingSecret` is set |
 
 ---

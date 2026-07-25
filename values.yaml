@@ -5,11 +5,11 @@ fullnameOverride: ""
 # ── Image settings ──────────────────────────────────────────────────
 images:
   api:
-    repository: ""            # e.g. your-registry/zimmporter-api
+    repository: ghcr.io/tomifarmer/zimmporter-api
     tag: "latest"
     pullPolicy: IfNotPresent
   frontend:
-    repository: ""            # e.g. your-registry/zimmporter-front
+    repository: ghcr.io/tomifarmer/zimmporter-front
     tag: "latest"
     pullPolicy: IfNotPresent
 
@@ -76,8 +76,8 @@ frontend:
   env:
     NEXT_PUBLIC_API_URL: "http://api:8000"
 
-# ── External MinIO ──────────────────────────────────────────────────
-minio:
+# ── External S3-compatible storage ──────────────────────────────────
+s3:
   endpoint: ""
   accessKey: ""
   secretKey: ""

@@ -55,6 +55,9 @@ api:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  initSecurityContext:
+    runAsNonRoot: false
+    runAsUser: 0
   probes:
     liveness:
       initialDelaySeconds: 30
@@ -77,6 +80,9 @@ worker:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  initSecurityContext:
+    runAsNonRoot: false
+    runAsUser: 0
   concurrency: 4
   pool: prefork
   env: {}

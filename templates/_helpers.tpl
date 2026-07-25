@@ -80,6 +80,14 @@ app.kubernetes.io/component: mariadb
 {{- .Values.database.port | default ( .Values.mariadb.external.port | toString ) | default "3306" }}
 {{- end }}
 
+{{- define "zimmporter.valkeyAddress" -}}
+{{- .Values.valkey.external.address | default (printf "%s-valkey" (include "zimmporter.fullname" .)) }}
+{{- end }}
+
+{{- define "zimmporter.valkeyPort" -}}
+{{- .Values.valkey.external.port | toString | default "6379" }}
+{{- end }}
+
 {{- define "zimmporter.celeryBroker" -}}
 {{- if .Values.celery.broker }}
 {{- .Values.celery.broker }}

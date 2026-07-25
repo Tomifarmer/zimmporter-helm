@@ -23,6 +23,27 @@ spec:
       imagePullSecrets:
         - name: {{ . }}
       {{- end }}
+      {{- if not .Values.mariadb.external.enabled }}
+      initContainers:
+        - name: wait-for-mariadb
+          image: busybox:1.36
+          securityContext:
+            {{- toYaml .Values.worker.initSecurityContext | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - until nc -z {{ include "zimmporter.dbHost" . }} {{ include "zimmporter.dbPort" . }}; do sleep 2; done
+      {{- end }}
+      {{- if not .Values.valkey.external.enabled }}
+        - name: wait-for-valkey
+          image: busybox:1.36
+          securityContext:
+            {{- toYaml .Values.worker.initSecurityContext | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - until nc -z {{ include "zimmporter.valkeyAddress" . }} {{ include "zimmporter.valkeyPort" . }}; do sleep 2; done
+      {{- end }}
       containers:
         - name: worker
           image: "{{ .Values.images.worker.repository }}:{{ .Values.images.worker.tag }}"

@@ -22,7 +22,7 @@ spec:
       containers:
         - name: mariadb
           image: "{{ .Values.mariadb.image }}"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           securityContext:
             runAsNonRoot: true
             runAsUser: 999

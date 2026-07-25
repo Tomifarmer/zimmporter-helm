@@ -17,6 +17,8 @@ spec:
       labels:
         {{- include "zimmporter.valkeySelectorLabels" . | nindent 8 }}
     spec:
+      securityContext:
+        runAsNonRoot: true
       containers:
         - name: valkey
           image: "{{ .Values.valkey.image }}"

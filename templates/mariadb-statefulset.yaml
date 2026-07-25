@@ -17,6 +17,8 @@ spec:
       labels:
         {{- include "zimmporter.mariadbSelectorLabels" . | nindent 8 }}
     spec:
+      securityContext:
+        runAsNonRoot: true
       containers:
         - name: mariadb
           image: "{{ .Values.mariadb.image }}"

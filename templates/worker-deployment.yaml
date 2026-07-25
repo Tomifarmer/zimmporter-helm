@@ -111,9 +111,9 @@ spec:
           livenessProbe:
             exec:
               command:
-                - kill
-                - -0
-                - "1"
+                - sh
+                - -c
+                - kill -0 1
             initialDelaySeconds: 30
             periodSeconds: 30
           resources:

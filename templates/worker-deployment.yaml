@@ -116,9 +116,10 @@ spec:
                 - tasks.celery_app
                 - inspect
                 - ping
-                - --timeout=5
+                - --timeout=10
             initialDelaySeconds: 30
             periodSeconds: 30
+            timeoutSeconds: 10
           resources:
             {{- toYaml .Values.worker.resources | nindent 12 }}
       volumes:

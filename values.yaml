@@ -58,6 +58,7 @@ api:
   initSecurityContext:
     runAsNonRoot: false
     runAsUser: 0
+    readOnlyRootFilesystem: true
   probes:
     liveness:
       initialDelaySeconds: 30
@@ -83,6 +84,7 @@ worker:
   initSecurityContext:
     runAsNonRoot: false
     runAsUser: 0
+    readOnlyRootFilesystem: true
   concurrency: 4
   pool: prefork
   env: {}

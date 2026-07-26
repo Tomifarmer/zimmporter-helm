@@ -11,8 +11,12 @@ data:
   CELERY_BACKEND: {{ include "zimmporter.celeryBackend" . | quote }}
   AWS_ENDPOINT_URL: {{ .Values.s3.endpoint | quote }}
   AWS_USE_SSL: {{ .Values.s3.useSSL | toString | quote }}
-  REQUIRE_AUTH: {{ .Values.api.env.REQUIRE_AUTH | quote }}
+  USE_SIMPLE_AUTH: {{ .Values.api.env.USE_SIMPLE_AUTH | quote }}
+  USE_SOCIAL_LOGIN: {{ .Values.api.env.USE_SOCIAL_LOGIN | quote }}
   CORS_ALLOWED_ORIGINS: {{ .Values.api.env.CORS_ALLOWED_ORIGINS | quote }}
+  OIDC_ISSUER_URL: {{ .Values.api.env.OIDC_ISSUER_URL | quote }}
+  OIDC_CLIENT_ID: {{ .Values.api.env.OIDC_CLIENT_ID | quote }}
+  GITHUB_CLIENT_ID: {{ .Values.api.env.GITHUB_CLIENT_ID | quote }}
 {{- if .Values.caCert.enabled }}
   CA_CERT: {{ .Values.caCert.path | quote }}
 {{- end }}
@@ -42,3 +46,9 @@ metadata:
     {{- include "zimmporter.labels" . | nindent 4 }}
 data:
   API_URL: {{ .Values.frontend.env.API_URL | default (include "zimmporter.apiInternalUrl" .) | quote }}
+  USE_SOCIAL_LOGIN: {{ .Values.frontend.env.USE_SOCIAL_LOGIN | quote }}
+  USE_SIMPLE_AUTH: {{ .Values.frontend.env.USE_SIMPLE_AUTH | quote }}
+  OIDC_NAME: {{ .Values.frontend.env.OIDC_NAME | quote }}
+  OIDC_ISSUER_URL: {{ .Values.frontend.env.OIDC_ISSUER_URL | quote }}
+  OIDC_CLIENT_ID: {{ .Values.frontend.env.OIDC_CLIENT_ID | quote }}
+  GITHUB_CLIENT_ID: {{ .Values.frontend.env.GITHUB_CLIENT_ID | quote }}

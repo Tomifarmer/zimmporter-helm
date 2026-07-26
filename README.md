@@ -101,7 +101,8 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `api.nodeSelector` | `{}` | Node selector |
 | `api.tolerations` | `[]` | Pod tolerations |
 | `api.affinity` | `{}` | Pod affinity/anti-affinity |
-| `api.env.REQUIRE_AUTH` | `"false"` | Enable API key authentication |
+| `api.env.USE_SIMPLE_AUTH` | `"false"` | Enable API key authentication |
+| `api.env.USE_SOCIAL_LOGIN` | `"false"` | Enable social login (OIDC/GitHub) Bearer token authentication |
 | `api.env.CORS_ALLOWED_ORIGINS` | `"*"` | CORS allowed origins |
 
 ### Worker
@@ -128,6 +129,11 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `frontend.tolerations` | `[]` | Pod tolerations |
 | `frontend.affinity` | `{}` | Pod affinity/anti-affinity |
 | `frontend.env.NEXT_PUBLIC_API_URL` | `"http://api:8000"` | Backend API URL (in-cluster) |
+| `frontend.env.USE_SOCIAL_LOGIN` | `"false"` | Enable social login (OIDC/GitHub) authentication |
+| `frontend.env.USE_SIMPLE_AUTH` | `"false"` | Enable API key authentication |
+| `frontend.env.OIDC_NAME` | `"OIDC"` | OIDC provider display name |
+| `frontend.env.OIDC_ISSUER_URL` | `""` | OIDC issuer URL |
+| `frontend.env.OIDC_CLIENT_ID` | `""` | OIDC client ID |
 
 ### S3 (external)
 
@@ -184,6 +190,8 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | Name | Default | Description |
 |---|---|---|
 | `auth.apiKey` | `""` | API key for `X-API-Key` header (ignored when `existingSecret` is set) |
+| `auth.oidcClientSecret` | `""` | OIDC client secret for the frontend |
+| `auth.authSecret` | `"dev-secret-change-in-production"` | NextAuth encryption secret (generate with `openssl rand -base64 32`) |
 | `auth.existingSecret` | `""` | Name of an existing Secret (skips chart-generated api-auth secret) |
 | `auth.existingSecretKey` | `"api-key"` | Key for the API key value within the existing secret |
 

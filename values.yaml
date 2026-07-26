@@ -70,8 +70,12 @@ api:
       periodSeconds: 10
       timeoutSeconds: 5
   env:
-    REQUIRE_AUTH: "false"
+    USE_SIMPLE_AUTH: "false"
+    USE_SOCIAL_LOGIN: "false"
     CORS_ALLOWED_ORIGINS: "*"
+    OIDC_ISSUER_URL: ""
+    OIDC_CLIENT_ID: ""
+    GITHUB_CLIENT_ID: ""
 
 # ── Celery Worker ───────────────────────────────────────────────────
 worker:
@@ -102,6 +106,12 @@ frontend:
   affinity: {}
   env:
     API_URL: ""
+    USE_SOCIAL_LOGIN: "false"
+    USE_SIMPLE_AUTH: "false"
+    OIDC_NAME: "OIDC"
+    OIDC_ISSUER_URL: ""
+    OIDC_CLIENT_ID: ""
+    GITHUB_CLIENT_ID: ""
 
 # ── External S3-compatible storage ──────────────────────────────────
 s3:
@@ -166,6 +176,9 @@ database:
 # ── Authentication ──────────────────────────────────────────────────
 auth:
   apiKey: ""
+  oidcClientSecret: ""
+  githubClientSecret: ""
+  authSecret: "dev-secret-change-in-production"
   # Reference an existing Secret instead of generating one.
   existingSecret: ""
   existingSecretKey: api-key

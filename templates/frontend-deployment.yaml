@@ -50,6 +50,21 @@ spec:
                 secretKeyRef:
                   name: {{ include "zimmporter.authSecretName" . }}
                   key: {{ .Values.auth.existingSecretKey }}
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "zimmporter.authSecretName" . }}
+                  key: oidc-client-secret
+            - name: GITHUB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "zimmporter.authSecretName" . }}
+                  key: github-client-secret
+            - name: AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "zimmporter.authSecretName" . }}
+                  key: auth-secret
           livenessProbe:
             httpGet:
               path: /

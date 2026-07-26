@@ -62,6 +62,7 @@ curl http://localhost:8000/health
 |---|---|---|
 | `nameOverride` | `""` | Overrides the `app.kubernetes.io/name` label |
 | `fullnameOverride` | `""` | Overrides the full resource name prefix |
+| `global.extraEnv` | `[]` | Additional env vars injected into **all** pods (see [extraEnv docs](#extraenv)) |
 
 ### Images
 
@@ -104,6 +105,7 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `api.env.USE_SIMPLE_AUTH` | `"false"` | Enable API key authentication |
 | `api.env.USE_SOCIAL_LOGIN` | `"false"` | Enable social login (OIDC/GitHub) Bearer token authentication |
 | `api.env.CORS_ALLOWED_ORIGINS` | `"*"` | CORS allowed origins |
+| `api.extraEnv` | `[]` | Additional env vars for the API pod (see [extraEnv docs](#extraenv)) |
 
 ### Worker
 
@@ -117,6 +119,7 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `worker.nodeSelector` | `{}` | Node selector |
 | `worker.tolerations` | `[]` | Pod tolerations |
 | `worker.affinity` | `{}` | Pod affinity/anti-affinity |
+| `worker.extraEnv` | `[]` | Additional env vars for the worker pod (see [extraEnv docs](#extraenv)) |
 
 
 ### Frontend
@@ -134,6 +137,7 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `frontend.env.OIDC_NAME` | `"OIDC"` | OIDC provider display name |
 | `frontend.env.OIDC_ISSUER_URL` | `""` | OIDC issuer URL |
 | `frontend.env.OIDC_CLIENT_ID` | `""` | OIDC client ID |
+| `frontend.extraEnv` | `[]` | Additional env vars for the frontend pod (see [extraEnv docs](#extraenv)) |
 
 ### S3 (external)
 
@@ -210,6 +214,37 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `caCert.path` | `"/etc/ssl/certs/ca.crt"` | Mount path inside the container |
 | `caCert.existingSecret` | `""` | Name of an existing Secret (must contain key named `ca.crt`) |
 | `caCert.key` | `"ca.crt"` | Key within the secret |
+
+### extraEnv
+
+Each component (`api`, `worker`, `frontend`) accepts an `extraEnv` list of
+Kubernetes env var entries. The `global.extraEnv` list is merged into
+**all** pods before the component-specific list, so component vars take
+precedence over global ones.
+
+| Name | Default | Description |
+|---|---|---|
+| `global.extraEnv` | `[]` | Applied to every pod |
+| `api.extraEnv` | `[]` | Applied to the API pod only |
+| `worker.extraEnv` | `[]` | Applied to the worker pod only |
+| `frontend.extraEnv` | `[]` | Applied to the frontend pod only |
+
+Each entry follows the standard Kubernetes `env` schema:
+
+```yaml
+extraEnv:
+  - name: MY_VAR
+    value: "plain value"
+  - name: SECRET_VAR
+    valueFrom:
+      secretKeyRef:
+        name: my-secret
+        key: my-key
+  - name: POD_IP
+    valueFrom:
+      fieldRef:
+        fieldPath: status.podIP
+```
 
 ---
 

@@ -93,6 +93,12 @@ spec:
             - name: CA_CERT
               value: {{ .Values.caCert.path | quote }}
           {{- end }}
+          {{- with .Values.global.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.api.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           livenessProbe:
             httpGet:
               path: /health

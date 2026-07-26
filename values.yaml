@@ -3,6 +3,7 @@ nameOverride: ""
 fullnameOverride: ""
 global:
   imagePullPolicy: ""
+  extraEnv: []
 
 # ── Image settings ──────────────────────────────────────────────────
 images:
@@ -76,6 +77,7 @@ api:
     OIDC_ISSUER_URL: ""
     OIDC_CLIENT_ID: ""
     GITHUB_CLIENT_ID: ""
+  extraEnv: []
 
 # ── Celery Worker ───────────────────────────────────────────────────
 worker:
@@ -94,6 +96,7 @@ worker:
   concurrency: 4
   pool: prefork
   env: {}
+  extraEnv: []
 
 # ── Frontend (Next.js) ──────────────────────────────────────────────
 frontend:
@@ -104,6 +107,7 @@ frontend:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  extraEnv: []
   env:
     API_URL: ""
     USE_SOCIAL_LOGIN: "false"

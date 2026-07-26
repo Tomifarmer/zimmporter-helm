@@ -103,6 +103,12 @@ spec:
             - name: CA_CERT
               value: {{ .Values.caCert.path | quote }}
           {{- end }}
+          {{- with .Values.global.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.worker.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: temp-data
               mountPath: /data/zimmer/importer

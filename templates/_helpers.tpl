@@ -76,7 +76,7 @@ app.kubernetes.io/component: mariadb
 {{- if .Values.auth.existingSecret }}
 {{- .Values.auth.existingSecret }}
 {{- else }}
-{{- include "zimmporter.fullname" . }}-api-auth
+{{- include "zimmporter.fullname" . }}-api-and-front-auth
 {{- end }}
 {{- end }}
 

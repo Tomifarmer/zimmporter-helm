@@ -106,6 +106,8 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `api.env.USE_SOCIAL_LOGIN` | `"false"` | Enable social login (OIDC/GitHub) Bearer token authentication |
 | `api.env.CORS_ALLOWED_ORIGINS` | `"*"` | CORS allowed origins |
 | `api.extraEnv` | `[]` | Additional env vars for the API pod (see [extraEnv docs](#extraenv)) |
+| `api.extraVolumes` | `[]` | Additional pod-level volumes (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
+| `api.extraVolumeMounts` | `[]` | Additional container volume mounts (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
 
 ### Worker
 
@@ -120,6 +122,8 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `worker.tolerations` | `[]` | Pod tolerations |
 | `worker.affinity` | `{}` | Pod affinity/anti-affinity |
 | `worker.extraEnv` | `[]` | Additional env vars for the worker pod (see [extraEnv docs](#extraenv)) |
+| `worker.extraVolumes` | `[]` | Additional pod-level volumes (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
+| `worker.extraVolumeMounts` | `[]` | Additional container volume mounts (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
 
 
 ### Frontend
@@ -138,16 +142,21 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `frontend.env.OIDC_ISSUER_URL` | `""` | OIDC issuer URL |
 | `frontend.env.OIDC_CLIENT_ID` | `""` | OIDC client ID |
 | `frontend.extraEnv` | `[]` | Additional env vars for the frontend pod (see [extraEnv docs](#extraenv)) |
+| `frontend.extraVolumes` | `[]` | Additional pod-level volumes (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
+| `frontend.extraVolumeMounts` | `[]` | Additional container volume mounts (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
 
 ### S3 (external)
 
 | Name | Default | Description |
-|---|---|---|
+|---|---|---|---|
 | `s3.endpoint` | `""` | S3 endpoint host:port |
-| `s3.accessKeyId` | `""` | S3 access key ID |
-| `s3.secretAccessKey` | `""` | S3 secret access key |
+| `s3.accessKey` | `""` | S3 access key (ignored when `existingSecret` is set) |
+| `s3.secretKey` | `""` | S3 secret key (ignored when `existingSecret` is set) |
 | `s3.bucket` | `""` | S3 bucket name |
 | `s3.useSSL` | `false` | Use HTTPS for S3 connections |
+| `s3.existingSecret` | `""` | Name of an existing Secret (skips chart-generated s3 secret) |
+| `s3.existingSecretKeyMapping.accessKey` | `"access-key"` | Key for S3 access key in the existing secret |
+| `s3.existingSecretKeyMapping.secretKey` | `"secret-key"` | Key for S3 secret key in the existing secret |
 
 ### MariaDB
 
@@ -159,6 +168,7 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `mariadb.external.port` | `3306` | External MariaDB port |
 | `mariadb.storageClass` | `""` | PVC storage class (ignored when external) |
 | `mariadb.persistence.size` | `"10Gi"` | PVC size (ignored when external) |
+| `mariadb.podSecurityContext` | `{runAsNonRoot: true, fsGroup: 999}` | Pod-level security context |
 | `mariadb.resources` | `{}` | Container resource limits/requests |
 
 ### Valkey
@@ -192,11 +202,12 @@ Both ingresses are **disabled by default**. Enable them per-component.
 ### Authentication
 
 | Name | Default | Description |
-|---|---|---|
+|---|---|---|---|
 | `auth.apiKey` | `""` | API key for `X-API-Key` header (ignored when `existingSecret` is set) |
 | `auth.oidcClientSecret` | `""` | OIDC client secret for the frontend |
+| `auth.githubClientSecret` | `""` | GitHub OAuth client secret for the frontend |
 | `auth.authSecret` | `"dev-secret-change-in-production"` | NextAuth encryption secret (generate with `openssl rand -base64 32`) |
-| `auth.existingSecret` | `""` | Name of an existing Secret (skips chart-generated api-auth secret) |
+| `auth.existingSecret` | `""` | Name of an existing Secret (skips chart-generated api-and-front-auth secret) |
 | `auth.existingSecretKey` | `"api-key"` | Key for the API key value within the existing secret |
 
 ### Celery
@@ -228,6 +239,36 @@ precedence over global ones.
 | `api.extraEnv` | `[]` | Applied to the API pod only |
 | `worker.extraEnv` | `[]` | Applied to the worker pod only |
 | `frontend.extraEnv` | `[]` | Applied to the frontend pod only |
+
+### extraVolumes / extraVolumeMounts
+
+Each component (`api`, `worker`, `frontend`) accepts `extraVolumes` and
+`extraVolumeMounts` lists to mount additional volumes into the pod.
+
+| Name | Default | Description |
+|---|---|---|
+| `api.extraVolumes` | `[]` | Applied to the API pod |
+| `api.extraVolumeMounts` | `[]` | Applied to the API container |
+| `worker.extraVolumes` | `[]` | Applied to the worker pod (in addition to the default `temp-data` / `tmp` volumes) |
+| `worker.extraVolumeMounts` | `[]` | Applied to the worker container (in addition to the default mounts) |
+| `frontend.extraVolumes` | `[]` | Applied to the frontend pod |
+| `frontend.extraVolumeMounts` | `[]` | Applied to the frontend container |
+
+Each entry follows the standard Kubernetes `volume` / `volumeMount` schema:
+
+```yaml
+frontend:
+  extraVolumes:
+    - name: config
+      configMap:
+        name: my-config
+  extraVolumeMounts:
+    - name: config
+      mountPath: /etc/config
+      readOnly: true
+```
+
+---
 
 Each entry follows the standard Kubernetes `env` schema:
 
@@ -262,7 +303,7 @@ extraEnv:
 | `ConfigMap` (×3) | `*-api-config`, `*-worker-config`, `*-frontend-config` | Non-sensitive environment variables |
 | `Secret` (conditional) | `*-database` | Skipped when `database.existingSecret` is set |
 | `Secret` | `*-s3` | Always created |
-| `Secret` (conditional) | `*-api-auth` | Skipped when `auth.existingSecret` is set |
+| `Secret` (conditional) | `*-api-and-front-auth` | Skipped when `auth.existingSecret` is set |
 
 ---
 
@@ -362,7 +403,7 @@ database:
   #   name: DB_NAME
 
 auth:
-  existingSecret: my-api-auth
+  existingSecret: my-api-and-front-auth
   existingSecretKey: api-key
 ```
 
@@ -371,7 +412,7 @@ The expected keys in your existing secret (defaults):
 | Secret | Required keys |
 |---|---|
 | `my-db-creds` | `root-password`, `user`, `password`, `name` |
-| `my-api-auth` | `api-key` |
+| `my-api-and-front-auth` | `api-key` |
 
 When `database.existingSecret` or `auth.existingSecret` is set, the
 chart skips creating its own Secret and uses yours directly.

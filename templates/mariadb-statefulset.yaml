@@ -17,8 +17,10 @@ spec:
       labels:
         {{- include "zimmporter.mariadbSelectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.mariadb.podSecurityContext }}
       securityContext:
-        runAsNonRoot: true
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: mariadb
           image: "{{ .Values.mariadb.image }}"

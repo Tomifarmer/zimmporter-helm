@@ -78,6 +78,8 @@ api:
     OIDC_CLIENT_ID: ""
     GITHUB_CLIENT_ID: ""
   extraEnv: []
+  extraVolumes: []
+  extraVolumeMounts: []
 
 # ── Celery Worker ───────────────────────────────────────────────────
 worker:
@@ -97,6 +99,8 @@ worker:
   pool: prefork
   env: {}
   extraEnv: []
+  extraVolumes: []
+  extraVolumeMounts: []
 
 # ── Frontend (Next.js) ──────────────────────────────────────────────
 frontend:
@@ -108,6 +112,8 @@ frontend:
   tolerations: []
   affinity: {}
   extraEnv: []
+  extraVolumes: []
+  extraVolumeMounts: []
   env:
     API_URL: ""
     USE_SOCIAL_LOGIN: "false"
@@ -124,6 +130,10 @@ s3:
   secretKey: ""
   bucket: ""
   useSSL: false
+  existingSecret: ""
+  existingSecretKeyMapping:
+    accessKey: access-key
+    secretKey: secret-key
 
 # ── MariaDB ─────────────────────────────────────────────────────────
 mariadb:
@@ -132,6 +142,9 @@ mariadb:
     enabled: false
     host: ""
     port: 3306
+  podSecurityContext:
+    runAsNonRoot: true
+    fsGroup: 999
   storageClass: ""
   persistence:
     size: 10Gi

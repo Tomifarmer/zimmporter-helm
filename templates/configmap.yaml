@@ -9,8 +9,6 @@ data:
   DB_PORT: {{ include "zimmporter.dbPort" . | quote }}
   CELERY_BROKER: {{ include "zimmporter.celeryBroker" . | quote }}
   CELERY_BACKEND: {{ include "zimmporter.celeryBackend" . | quote }}
-  AWS_ENDPOINT_URL: {{ .Values.s3.endpoint | quote }}
-  AWS_USE_SSL: {{ .Values.s3.useSSL | toString | quote }}
   USE_SIMPLE_AUTH: {{ .Values.api.env.USE_SIMPLE_AUTH | quote }}
   USE_SOCIAL_LOGIN: {{ .Values.api.env.USE_SOCIAL_LOGIN | quote }}
   CORS_ALLOWED_ORIGINS: {{ .Values.api.env.CORS_ALLOWED_ORIGINS | quote }}
@@ -34,6 +32,7 @@ data:
   CELERY_BACKEND: {{ include "zimmporter.celeryBackend" . | quote }}
   AWS_ENDPOINT_URL: {{ .Values.s3.endpoint | quote }}
   AWS_USE_SSL: {{ .Values.s3.useSSL | toString | quote }}
+  AWS_BUCKET: {{ .Values.s3.bucket | quote }}
 {{- if .Values.caCert.enabled }}
   CA_CERT: {{ .Values.caCert.path | quote }}
 {{- end }}

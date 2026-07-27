@@ -69,21 +69,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "zimmporter.databaseSecretName" . }}
                   key: {{ .Values.database.existingSecretKeyMapping.name }}
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "zimmporter.fullname" . }}-s3
-                  key: access-key
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "zimmporter.fullname" . }}-s3
-                  key: secret-key
-            - name: AWS_BUCKET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "zimmporter.fullname" . }}-s3
-                  key: bucket
             - name: API_KEY
               valueFrom:
                 secretKeyRef:
@@ -97,6 +82,10 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.api.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.api.extraVolumeMounts }}
+          volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           livenessProbe:
@@ -125,5 +114,9 @@ spec:
       {{- end }}
       {{- with .Values.api.affinity }}
       affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.api.extraVolumes }}
+      volumes:
         {{- toYaml . | nindent 8 }}
       {{- end }}

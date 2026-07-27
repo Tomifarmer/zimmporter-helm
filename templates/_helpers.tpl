@@ -64,6 +64,14 @@ app.kubernetes.io/component: mariadb
 {{- end }}
 {{- end }}
 
+{{- define "zimmporter.s3SecretName" -}}
+{{- if .Values.s3.existingSecret }}
+{{- .Values.s3.existingSecret }}
+{{- else }}
+{{- include "zimmporter.fullname" . }}-s3
+{{- end }}
+{{- end }}
+
 {{- define "zimmporter.authSecretName" -}}
 {{- if .Values.auth.existingSecret }}
 {{- .Values.auth.existingSecret }}

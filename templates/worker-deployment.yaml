@@ -87,18 +87,13 @@ spec:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "zimmporter.fullname" . }}-s3
-                  key: access-key
+                  name: {{ include "zimmporter.s3SecretName" . }}
+                  key: {{ .Values.s3.existingSecretKeyMapping.accessKey }}
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "zimmporter.fullname" . }}-s3
-                  key: secret-key
-            - name: AWS_BUCKET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "zimmporter.fullname" . }}-s3
-                  key: bucket
+                  name: {{ include "zimmporter.s3SecretName" . }}
+                  key: {{ .Values.s3.existingSecretKeyMapping.secretKey }}
           {{- if .Values.caCert.enabled }}
             - name: CA_CERT
               value: {{ .Values.caCert.path | quote }}
@@ -114,6 +109,9 @@ spec:
               mountPath: /data/zimmer/importer
             - name: tmp
               mountPath: /tmp
+          {{- with .Values.worker.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           livenessProbe:
             exec:
               command:
@@ -129,6 +127,9 @@ spec:
           emptyDir: {}
         - name: tmp
           emptyDir: {}
+      {{- with .Values.worker.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.worker.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

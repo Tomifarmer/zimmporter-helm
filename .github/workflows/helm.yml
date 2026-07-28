@@ -15,6 +15,17 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Check chart version matches tag
+        if: github.ref_type == 'tag'
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          CHART_VERSION=$(grep '^version:' Chart.yaml | awk '{print $2}')
+          if [ "$TAG" != "$CHART_VERSION" ]; then
+            echo "❌ Chart version ($CHART_VERSION) does not match tag ($TAG)"
+            exit 1
+          fi
+          echo "✅ Chart version $CHART_VERSION matches tag $TAG"
+
       - name: Install Helm
         uses: azure/setup-helm@v5
 

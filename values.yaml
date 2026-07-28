@@ -44,13 +44,13 @@ ingress:
 # ── API (FastAPI) ───────────────────────────────────────────────────
 api:
   replicas: 1
-  resources: {}
-    # limits:
-    #   cpu: 500m
-    #   memory: 512Mi
-    # requests:
-    #   cpu: 250m
-    #   memory: 256Mi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
   podSecurityContext:
     fsGroup: 51000
   nodeSelector: {}
@@ -84,7 +84,13 @@ api:
 # ── Celery Worker ───────────────────────────────────────────────────
 worker:
   replicas: 1
-  resources: {}
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1
+      memory: 1Gi
   podSecurityContext:
     fsGroup: 51000
   nodeSelector: {}
@@ -105,7 +111,13 @@ worker:
 # ── Frontend (Next.js) ──────────────────────────────────────────────
 frontend:
   replicas: 1
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
   podSecurityContext:
     runAsNonRoot: true
   nodeSelector: {}
@@ -115,6 +127,9 @@ frontend:
   extraVolumes: []
   extraVolumeMounts: []
   env:
+    # Set to full URL with scheme (e.g. "https://api.example.com")
+    # when using TLS ingress. Without a scheme the frontend treats
+    # the value as a relative path and constructs the wrong URL.
     API_URL: ""
     USE_SOCIAL_LOGIN: "false"
     USE_SIMPLE_AUTH: "false"
@@ -148,10 +163,13 @@ mariadb:
   storageClass: ""
   persistence:
     size: 10Gi
-  resources: {}
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 1Gi
 
 # ── Valkey ──────────────────────────────────────────────────────────
 valkey:
@@ -163,10 +181,13 @@ valkey:
   storageClass: ""
   persistence:
     size: 1Gi
-  resources: {}
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
 # ── Celery broker/backend (overrides auto-derived defaults) ─────────
 celery:

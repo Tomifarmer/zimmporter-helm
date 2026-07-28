@@ -98,7 +98,7 @@ Both ingresses are **disabled by default**. Enable them per-component.
 |---|---|---|
 | `api.replicas` | `1` | Number of API pods |
 | `api.podSecurityContext` | `{fsGroup: 51000}` | Pod-level security context |
-| `api.resources` | `{}` | Container resource limits/requests |
+| `api.resources` | `{requests: {cpu: 100m, memory: 128Mi}, limits: {cpu: 500m, memory: 512Mi}}` | Container resource limits/requests |
 | `api.nodeSelector` | `{}` | Node selector |
 | `api.tolerations` | `[]` | Pod tolerations |
 | `api.affinity` | `{}` | Pod affinity/anti-affinity |
@@ -115,7 +115,7 @@ Both ingresses are **disabled by default**. Enable them per-component.
 |---|---|---|
 | `worker.replicas` | `1` | Number of worker pods |
 | `worker.podSecurityContext` | `{fsGroup: 51000}` | Pod-level security context |
-| `worker.resources` | `{}` | Container resource limits/requests |
+| `worker.resources` | `{requests: {cpu: 200m, memory: 256Mi}, limits: {cpu: 1, memory: 1Gi}}` | Container resource limits/requests |
 | `worker.concurrency` | `4` | Celery worker concurrency |
 | `worker.pool` | `"prefork"` | Celery worker pool type |
 | `worker.nodeSelector` | `{}` | Node selector |
@@ -131,11 +131,11 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | Name | Default | Description |
 |---|---|---|
 | `frontend.replicas` | `1` | Number of frontend pods |
-| `frontend.resources` | `{}` | Container resource limits/requests |
+| `frontend.resources` | `{requests: {cpu: 100m, memory: 128Mi}, limits: {cpu: 500m, memory: 512Mi}}` | Container resource limits/requests |
 | `frontend.nodeSelector` | `{}` | Node selector |
 | `frontend.tolerations` | `[]` | Pod tolerations |
 | `frontend.affinity` | `{}` | Pod affinity/anti-affinity |
-| `frontend.env.NEXT_PUBLIC_API_URL` | `"http://api:8000"` | Backend API URL (in-cluster) |
+| `frontend.env.API_URL` | `""` | Backend API URL (auto-derived from in-cluster service when empty; set to full `https://` URL when using TLS ingress) |
 | `frontend.env.USE_SOCIAL_LOGIN` | `"false"` | Enable social login (OIDC/GitHub) authentication |
 | `frontend.env.USE_SIMPLE_AUTH` | `"false"` | Enable API key authentication |
 | `frontend.env.OIDC_NAME` | `"OIDC"` | OIDC provider display name |
@@ -169,7 +169,7 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `mariadb.storageClass` | `""` | PVC storage class (ignored when external) |
 | `mariadb.persistence.size` | `"10Gi"` | PVC size (ignored when external) |
 | `mariadb.podSecurityContext` | `{runAsNonRoot: true, fsGroup: 999}` | Pod-level security context |
-| `mariadb.resources` | `{}` | Container resource limits/requests |
+| `mariadb.resources` | `{requests: {cpu: 200m, memory: 512Mi}, limits: {cpu: 1, memory: 1Gi}}` | Container resource limits/requests |
 
 ### Valkey
 
@@ -181,7 +181,7 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `valkey.external.port` | `6379` | External Valkey port |
 | `valkey.storageClass` | `""` | PVC storage class (ignored when external) |
 | `valkey.persistence.size` | `"1Gi"` | PVC size (ignored when external) |
-| `valkey.resources` | `{}` | Container resource limits/requests |
+| `valkey.resources` | `{requests: {cpu: 100m, memory: 128Mi}, limits: {cpu: 500m, memory: 512Mi}}` | Container resource limits/requests |
 
 ### Database
 

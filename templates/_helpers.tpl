@@ -80,6 +80,32 @@ app.kubernetes.io/component: mariadb
 {{- end }}
 {{- end }}
 
+{{- define "zimmporter.dbRootPassword" -}}
+{{- if .Values.database.rootPassword }}
+{{- .Values.database.rootPassword }}
+{{- else }}
+{{- $secret := (lookup "v1" "Secret" .Release.Namespace (include "zimmporter.databaseSecretName" .)) }}
+{{- if $secret }}
+{{- index $secret.data "root-password" | b64dec }}
+{{- else }}
+{{- randAlphaNum 20 }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "zimmporter.dbPassword" -}}
+{{- if .Values.database.password }}
+{{- .Values.database.password }}
+{{- else }}
+{{- $secret := (lookup "v1" "Secret" .Release.Namespace (include "zimmporter.databaseSecretName" .)) }}
+{{- if $secret }}
+{{- $secret.data.password | b64dec }}
+{{- else }}
+{{- randAlphaNum 20 }}
+{{- end }}
+{{- end }}
+{{- end }}
+
 {{- define "zimmporter.dbHost" -}}
 {{- .Values.database.host | default .Values.mariadb.external.host | default (printf "%s-mariadb" (include "zimmporter.fullname" .)) }}
 {{- end }}

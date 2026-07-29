@@ -219,11 +219,10 @@ auth:
   oidcClientId: ""
   oidcClientSecret: ""
   githubClientSecret: ""
+  # NextAuth encryption key — signs JWTs and encrypts session cookies.
+  # Generate one with: openssl rand -base64 32
   authSecret: "dev-secret-change-in-production"
-  # Reference an existing Secret instead of generating one.
-  existingSecret: ""
-  existingSecretKey: api-key
-  # Dedicated secret ref for API_KEY (overrides auth.existingSecret for this value).
+  # Dedicated secret ref for API_KEY.
   apiKeyExistingSecret: ""
   apiKeyExistingSecretKey: api-key
   # OIDC-specific secret for client ID and client secret.

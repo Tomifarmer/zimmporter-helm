@@ -73,7 +73,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.auth.apiKeyExistingSecret | default (include "zimmporter.authSecretName" .) }}
-                  key: {{ .Values.auth.apiKeyExistingSecretKey | default .Values.auth.existingSecretKey }}
+                  key: {{ .Values.auth.apiKeyExistingSecretKey | default "api-key" }}
           {{- if or .Values.auth.oidc.existingSecret .Values.auth.oidcClientId }}
             - name: OIDC_CLIENT_ID
               valueFrom:

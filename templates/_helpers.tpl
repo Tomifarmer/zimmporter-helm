@@ -73,11 +73,7 @@ app.kubernetes.io/component: mariadb
 {{- end }}
 
 {{- define "zimmporter.authSecretName" -}}
-{{- if .Values.auth.existingSecret }}
-{{- .Values.auth.existingSecret }}
-{{- else }}
 {{- include "zimmporter.fullname" . }}-api-and-front-auth
-{{- end }}
 {{- end }}
 
 {{- define "zimmporter.authOidcSecretName" -}}

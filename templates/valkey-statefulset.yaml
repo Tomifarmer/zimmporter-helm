@@ -17,8 +17,10 @@ spec:
       labels:
         {{- include "zimmporter.valkeySelectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.valkey.podSecurityContext }}
       securityContext:
-        runAsNonRoot: true
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: valkey
           image: "{{ .Values.valkey.image }}"
@@ -29,7 +31,7 @@ spec:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
             capabilities:
-              drop: [ALL]
+              drop: [ ALL ]
             seccompProfile:
               type: RuntimeDefault
           ports:

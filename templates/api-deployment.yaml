@@ -72,13 +72,15 @@ spec:
             - name: API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "zimmporter.authSecretName" . }}
-                  key: {{ .Values.auth.existingSecretKey }}
+                  name: {{ .Values.auth.apiKeyExistingSecret | default (include "zimmporter.authSecretName" .) }}
+                  key: {{ .Values.auth.apiKeyExistingSecretKey | default .Values.auth.existingSecretKey }}
+          {{- if or .Values.auth.oidc.existingSecret .Values.auth.oidcClientId }}
             - name: OIDC_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: {{ include "zimmporter.authOidcSecretName" . }}
                   key: {{ .Values.auth.oidc.existingSecretKeyMapping.clientId }}
+          {{- end }}
           {{- if .Values.caCert.enabled }}
             - name: CA_CERT
               value: {{ .Values.caCert.path | quote }}

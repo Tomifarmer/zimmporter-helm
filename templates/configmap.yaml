@@ -13,6 +13,7 @@ data:
   USE_SOCIAL_LOGIN: {{ .Values.api.env.USE_SOCIAL_LOGIN | quote }}
   CORS_ALLOWED_ORIGINS: {{ .Values.api.env.CORS_ALLOWED_ORIGINS | quote }}
   OIDC_ISSUER_URL: {{ .Values.api.env.OIDC_ISSUER_URL | quote }}
+  OIDC_CLIENT_ID: {{ .Values.api.env.OIDC_CLIENT_ID | quote }}
   GITHUB_CLIENT_ID: {{ .Values.api.env.GITHUB_CLIENT_ID | quote }}
 {{- if .Values.caCert.enabled }}
   CA_CERT: {{ .Values.caCert.path | quote }}

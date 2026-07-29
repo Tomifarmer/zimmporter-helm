@@ -80,6 +80,14 @@ app.kubernetes.io/component: mariadb
 {{- end }}
 {{- end }}
 
+{{- define "zimmporter.authOidcSecretName" -}}
+{{- if .Values.auth.oidc.existingSecret }}
+{{- .Values.auth.oidc.existingSecret }}
+{{- else }}
+{{- include "zimmporter.fullname" . }}-auth-oidc
+{{- end }}
+{{- end }}
+
 {{- define "zimmporter.dbRootPassword" -}}
 {{- if .Values.database.rootPassword }}
 {{- .Values.database.rootPassword }}

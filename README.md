@@ -175,6 +175,7 @@ Both ingresses are **disabled by default**. Enable them per-component.
 
 | Name | Default | Description |
 |---|---|---|
+| `valkey.podSecurityContext` | `{runAsNonRoot: true, fsGroup: 999}` | Pod-level security context |
 | `valkey.image` | `"valkey/valkey:latest"` | Valkey image (ignored when external) |
 | `valkey.external.enabled` | `false` | Use an external Valkey/Redis instance |
 | `valkey.external.address` | `""` | External Valkey hostname |

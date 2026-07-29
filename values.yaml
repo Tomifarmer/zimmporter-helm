@@ -218,6 +218,7 @@ auth:
   apiKey: ""
   oidcClientId: ""
   oidcClientSecret: ""
+  githubClientId: ""
   githubClientSecret: ""
   # NextAuth encryption key — signs JWTs and encrypts session cookies.
   # Generate one with: openssl rand -base64 32
@@ -231,6 +232,12 @@ auth:
     existingSecretKeyMapping:
       clientId: client-id
       clientSecret: client-secret
+  # GitHub-specific secret for client ID and client secret.
+  github:
+    existingSecret: ""
+    existingSecretKeyMapping:
+      clientId: github-client-id
+      clientSecret: github-client-secret
 
 # ── Private CA certificate ──────────────────────────────────────────
 caCert:

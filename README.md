@@ -105,6 +105,7 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `api.env.USE_SIMPLE_AUTH` | `"false"` | Enable API key authentication |
 | `api.env.USE_SOCIAL_LOGIN` | `"false"` | Enable social login (OIDC/GitHub) Bearer token authentication |
 | `api.env.CORS_ALLOWED_ORIGINS` | `"*"` | CORS allowed origins |
+| `api.env.OIDC_ISSUER_URL` | `""` | OIDC issuer URL (moved to a secret when `auth.oidcClientId` is set) |
 | `api.extraEnv` | `[]` | Additional env vars for the API pod (see [extraEnv docs](#extraenv)) |
 | `api.extraVolumes` | `[]` | Additional pod-level volumes (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
 | `api.extraVolumeMounts` | `[]` | Additional container volume mounts (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
@@ -140,7 +141,6 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `frontend.env.USE_SIMPLE_AUTH` | `"false"` | Enable API key authentication |
 | `frontend.env.OIDC_NAME` | `"OIDC"` | OIDC provider display name |
 | `frontend.env.OIDC_ISSUER_URL` | `""` | OIDC issuer URL |
-| `frontend.env.OIDC_CLIENT_ID` | `""` | OIDC client ID |
 | `frontend.extraEnv` | `[]` | Additional env vars for the frontend pod (see [extraEnv docs](#extraenv)) |
 | `frontend.extraVolumes` | `[]` | Additional pod-level volumes (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
 | `frontend.extraVolumeMounts` | `[]` | Additional container volume mounts (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
@@ -203,13 +203,21 @@ Both ingresses are **disabled by default**. Enable them per-component.
 ### Authentication
 
 | Name | Default | Description |
-|---|---|---|---|
-| `auth.apiKey` | `""` | API key for `X-API-Key` header (ignored when `existingSecret` is set) |
-| `auth.oidcClientSecret` | `""` | OIDC client secret for the frontend |
-| `auth.githubClientSecret` | `""` | GitHub OAuth client secret for the frontend |
-| `auth.authSecret` | `"dev-secret-change-in-production"` | NextAuth encryption secret (generate with `openssl rand -base64 32`) |
-| `auth.existingSecret` | `""` | Name of an existing Secret (skips chart-generated api-and-front-auth secret) |
-| `auth.existingSecretKey` | `"api-key"` | Key for the API key value within the existing secret |
+|---|---|---|
+| `auth.apiKey` | `""` | API key for `X-API-Key` header |
+| `auth.oidcClientId` | `""` | OIDC client ID (injected into API + frontend; when set, overrides ConfigMap value via the oidc secret) |
+| `auth.oidcClientSecret` | `""` | OIDC client secret for the frontend (injected only when `USE_SOCIAL_LOGIN=true`) |
+| `auth.githubClientId` | `""` | GitHub client ID (injected into API + frontend; when set, overrides ConfigMap value via the github secret) |
+| `auth.githubClientSecret` | `""` | GitHub OAuth client secret for the frontend (injected only when `USE_SOCIAL_LOGIN=true`) |
+| `auth.authSecret` | `"dev-secret-change-in-production"` | NextAuth encryption key — signs JWTs and encrypts session cookies. Generate one with `openssl rand -base64 32` |
+| `auth.apiKeyExistingSecret` | `""` | Name of an existing Secret containing the API key (overrides the chart-generated auth secret) |
+| `auth.apiKeyExistingSecretKey` | `"api-key"` | Key for the API key within `apiKeyExistingSecret` |
+| `auth.oidc.existingSecret` | `""` | Name of an existing Secret containing OIDC credentials (skips chart-generated auth-oidc secret) |
+| `auth.oidc.existingSecretKeyMapping.clientId` | `"client-id"` | Key for the OIDC client ID in the existing secret |
+| `auth.oidc.existingSecretKeyMapping.clientSecret` | `"client-secret"` | Key for the OIDC client secret in the existing secret |
+| `auth.github.existingSecret` | `""` | Name of an existing Secret containing GitHub OAuth credentials (skips chart-generated auth-github secret) |
+| `auth.github.existingSecretKeyMapping.clientId` | `"github-client-id"` | Key for the GitHub client ID in the existing secret |
+| `auth.github.existingSecretKeyMapping.clientSecret` | `"github-client-secret"` | Key for the GitHub client secret in the existing secret |
 
 ### Celery
 
@@ -304,7 +312,9 @@ extraEnv:
 | `ConfigMap` (×3) | `*-api-config`, `*-worker-config`, `*-frontend-config` | Non-sensitive environment variables |
 | `Secret` (conditional) | `*-database` | Skipped when `database.existingSecret` is set |
 | `Secret` | `*-s3` | Always created |
-| `Secret` (conditional) | `*-api-and-front-auth` | Skipped when `auth.existingSecret` is set |
+| `Secret` | `*-api-and-front-auth` | Always created (holds api-key and auth-secret) |
+| `Secret` (conditional) | `*-auth-oidc` | Skipped when `auth.oidc.existingSecret` is set |
+| `Secret` (conditional) | `*-auth-github` | Skipped when `auth.github.existingSecret` is set |
 
 ---
 
@@ -404,8 +414,23 @@ database:
   #   name: DB_NAME
 
 auth:
-  existingSecret: my-api-and-front-auth
-  existingSecretKey: api-key
+  # API key from a dedicated secret (override the chart-generated secret)
+  apiKeyExistingSecret: my-api-key
+  apiKeyExistingSecretKey: api-key
+
+  # OIDC credentials from their own secret
+  oidc:
+    existingSecret: my-oidc-creds
+    # existingSecretKeyMapping:
+    #   clientId: OIDC_CLIENT_ID
+    #   clientSecret: OIDC_CLIENT_SECRET
+
+  # GitHub OAuth credentials from their own secret
+  github:
+    existingSecret: my-github-creds
+    # existingSecretKeyMapping:
+    #   clientId: GITHUB_CLIENT_ID
+    #   clientSecret: GITHUB_CLIENT_SECRET
 ```
 
 The expected keys in your existing secret (defaults):
@@ -413,9 +438,11 @@ The expected keys in your existing secret (defaults):
 | Secret | Required keys |
 |---|---|
 | `my-db-creds` | `root-password`, `user`, `password`, `name` |
-| `my-api-and-front-auth` | `api-key` |
+| `my-api-key` | `api-key` |
+| `my-oidc-creds` | `client-id`, `client-secret` |
+| `my-github-creds` | `github-client-id`, `github-client-secret` |
 
-When `database.existingSecret` or `auth.existingSecret` is set, the
+When `database.existingSecret` or `auth.oidc.existingSecret` is set, the
 chart skips creating its own Secret and uses yours directly.
 
 ---

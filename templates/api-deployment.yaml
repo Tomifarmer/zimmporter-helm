@@ -81,6 +81,13 @@ spec:
                   name: {{ include "zimmporter.authOidcSecretName" . }}
                   key: {{ .Values.auth.oidc.existingSecretKeyMapping.clientId }}
           {{- end }}
+          {{- if or .Values.auth.github.existingSecret .Values.auth.githubClientId }}
+            - name: GITHUB_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "zimmporter.authGitHubSecretName" . }}
+                  key: {{ .Values.auth.github.existingSecretKeyMapping.clientId }}
+          {{- end }}
           {{- if .Values.caCert.enabled }}
             - name: CA_CERT
               value: {{ .Values.caCert.path | quote }}

@@ -84,6 +84,14 @@ app.kubernetes.io/component: mariadb
 {{- end }}
 {{- end }}
 
+{{- define "zimmporter.authGitHubSecretName" -}}
+{{- if .Values.auth.github.existingSecret }}
+{{- .Values.auth.github.existingSecret }}
+{{- else }}
+{{- include "zimmporter.fullname" . }}-auth-github
+{{- end }}
+{{- end }}
+
 {{- define "zimmporter.dbRootPassword" -}}
 {{- if .Values.database.rootPassword }}
 {{- .Values.database.rootPassword }}

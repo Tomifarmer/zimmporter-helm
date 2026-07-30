@@ -2,5 +2,5 @@ apiVersion: v2
 name: zimmporter
 description: A Helm chart for deploying the Zimmporter stack (API, Celery worker, Frontend, Valkey, MariaDB)
 type: application
-version: 1.0.1
-appVersion: "1.0.1"
+version: 1.0.2
+appVersion: "1.0.2"

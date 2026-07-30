@@ -77,6 +77,7 @@ api:
     OIDC_ISSUER_URL: ""
     OIDC_CLIENT_ID: ""
     GITHUB_CLIENT_ID: ""
+    API_PROXY_FETCH: "false"
   extraEnv: []
   extraVolumes: []
   extraVolumeMounts: []

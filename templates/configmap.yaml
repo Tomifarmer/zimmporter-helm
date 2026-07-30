@@ -15,6 +15,7 @@ data:
   OIDC_ISSUER_URL: {{ .Values.api.env.OIDC_ISSUER_URL | quote }}
   OIDC_CLIENT_ID: {{ .Values.api.env.OIDC_CLIENT_ID | quote }}
   GITHUB_CLIENT_ID: {{ .Values.api.env.GITHUB_CLIENT_ID | quote }}
+  API_PROXY_FETCH: {{ .Values.api.env.API_PROXY_FETCH | quote }}
 {{- if .Values.caCert.enabled }}
   CA_CERT: {{ .Values.caCert.path | quote }}
 {{- end }}

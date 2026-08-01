@@ -37,7 +37,6 @@ data:
   AWS_BUCKET: {{ .Values.s3.bucket | quote }}
   YTDLP_COOKIEFILE: {{ printf "%s/%s" .Values.cookies.workerMountPath .Values.cookies.filename | quote }}
   NAVIDROME_URL: {{ .Values.navidrome.url | quote }}
-  NAVIDROME_USER: {{ .Values.navidrome.user | quote }}
   {{- if .Values.potProvider.enabled }}
   POT_PROVIDER_URL: {{ include "zimmporter.potProviderUrl" . | quote }}
   {{- end }}

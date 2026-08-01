@@ -206,7 +206,8 @@ potProvider:
     pullPolicy: IfNotPresent
   replicas: 1
   port: 4416
-  podSecurityContext: {}
+  podSecurityContext:
+    runAsNonRoot: true
   probes:
     enabled: true
     liveness:

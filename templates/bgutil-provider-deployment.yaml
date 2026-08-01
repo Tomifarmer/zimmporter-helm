@@ -26,6 +26,7 @@ spec:
           imagePullPolicy: {{ .Values.global.imagePullPolicy | default .Values.potProvider.image.pullPolicy }}
           securityContext:
             runAsNonRoot: true
+            readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
@@ -34,6 +35,9 @@ spec:
           ports:
             - containerPort: {{ .Values.potProvider.port }}
               name: http
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           {{- with .Values.potProvider.extraEnv }}
           env:
             {{- toYaml . | nindent 12 }}
@@ -66,4 +70,7 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
 {{- end }}

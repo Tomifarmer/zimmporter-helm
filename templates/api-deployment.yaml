@@ -23,8 +23,9 @@ spec:
       imagePullSecrets:
         - name: {{ . }}
       {{- end }}
-      {{- if not .Values.mariadb.external.enabled }}
+      {{- if or (not .Values.mariadb.external.enabled) (not .Values.valkey.external.enabled) }}
       initContainers:
+        {{- if not .Values.mariadb.external.enabled }}
         - name: wait-for-mariadb
           image: {{ .Values.api.initImage }}
           securityContext:
@@ -33,6 +34,17 @@ spec:
             - sh
             - -c
             - until nc -z {{ include "zimmporter.dbHost" . }} {{ include "zimmporter.dbPort" . }}; do sleep 2; done
+        {{- end }}
+        {{- if not .Values.valkey.external.enabled }}
+        - name: wait-for-valkey
+          image: {{ .Values.api.initImage }}
+          securityContext:
+            {{- toYaml .Values.api.initSecurityContext | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - until nc -z {{ include "zimmporter.valkeyAddress" . }} {{ include "zimmporter.valkeyPort" . }}; do sleep 2; done
+        {{- end }}
       {{- end }}
       containers:
         - name: api
@@ -88,10 +100,6 @@ spec:
                   name: {{ include "zimmporter.authGitHubSecretName" . }}
                   key: {{ .Values.auth.github.existingSecretKeyMapping.clientId }}
           {{- end }}
-          {{- if .Values.caCert.enabled }}
-            - name: CA_CERT
-              value: {{ .Values.caCert.path | quote }}
-          {{- end }}
           {{- with .Values.global.extraEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -101,6 +109,12 @@ spec:
           volumeMounts:
             - name: cookies
               mountPath: {{ .Values.cookies.dir | quote }}
+          {{- if and .Values.caCert.enabled .Values.caCert.existingConfigMap }}
+            - name: ca-cert
+              mountPath: {{ .Values.caCert.path | quote }}
+              subPath: {{ .Values.caCert.key }}
+              readOnly: true
+          {{- end }}
           {{- with .Values.api.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -140,6 +154,12 @@ spec:
         {{- else }}
         - name: cookies
           emptyDir: {}
+        {{- end }}
+        {{- if and .Values.caCert.enabled .Values.caCert.existingConfigMap }}
+        - name: ca-cert
+          configMap:
+            name: {{ .Values.caCert.existingConfigMap }}
+            defaultMode: 0444
         {{- end }}
       {{- with .Values.api.extraVolumes }}
         {{- toYaml . | nindent 8 }}

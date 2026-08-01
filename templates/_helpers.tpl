@@ -55,12 +55,6 @@ app.kubernetes.io/component: mariadb
 app.kubernetes.io/component: bgutil-provider
 {{- end }}
 
-{{- define "zimmporter.imagePullSecret" -}}
-{{- if .Values.images.api.pullSecret }}
-{"auths":{"https://index.docker.io/v1/":{"auth":"{{ .Values.images.api.pullSecret }}"}}}
-{{- end }}
-{{- end }}
-
 {{- define "zimmporter.databaseSecretName" -}}
 {{- if .Values.database.existingSecret }}
 {{- .Values.database.existingSecret }}

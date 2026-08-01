@@ -38,9 +38,14 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
-          {{- with .Values.potProvider.extraEnv }}
+          {{- if or .Values.global.extraEnv .Values.potProvider.extraEnv }}
           env:
+            {{- with .Values.global.extraEnv }}
             {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.potProvider.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- end }}
           {{- if .Values.potProvider.probes.enabled }}
           livenessProbe:

@@ -58,6 +58,9 @@ spec:
                 secretKeyRef:
                   name: {{ include "zimmporter.databaseSecretName" . }}
                   key: {{ .Values.database.existingSecretKeyMapping.password }}
+          {{- with .Values.global.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           livenessProbe:
             exec:
               command:

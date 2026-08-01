@@ -71,12 +71,18 @@ curl http://localhost:8000/health
 
 | Name | Default | Description |
 |---|---|---|
-| `images.api.repository` | `""` | Docker image for the API + worker (same image) |
+| `images.api.repository` | `"ghcr.io/tomifarmer/zimmporter-api"` | Docker image for the API |
 | `images.api.tag` | `"latest"` | Image tag |
 | `images.api.pullPolicy` | `IfNotPresent` | Image pull policy |
-| `images.frontend.repository` | `""` | Docker image for the Next.js frontend |
+| `images.api.pullSecret` | `""` | Name of the imagePullSecret for the API |
+| `images.worker.repository` | `"ghcr.io/tomifarmer/zimmporter-worker"` | Docker image for the Celery worker |
+| `images.worker.tag` | `"latest"` | Image tag |
+| `images.worker.pullPolicy` | `IfNotPresent` | Image pull policy |
+| `images.worker.pullSecret` | `""` | Name of the imagePullSecret for the worker |
+| `images.frontend.repository` | `"ghcr.io/tomifarmer/zimmporter-front"` | Docker image for the Next.js frontend |
 | `images.frontend.tag` | `"latest"` | Image tag |
 | `images.frontend.pullPolicy` | `IfNotPresent` | Image pull policy |
+| `images.frontend.pullSecret` | `""` | Name of the imagePullSecret for the frontend |
 
 ### Ingress
 
@@ -108,7 +114,7 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `api.env.USE_SIMPLE_AUTH` | `"false"` | Enable API key authentication |
 | `api.env.USE_SOCIAL_LOGIN` | `"false"` | Enable social login (OIDC/GitHub) Bearer token authentication |
 | `api.env.CORS_ALLOWED_ORIGINS` | `"*"` | CORS allowed origins |
-| `api.env.OIDC_ISSUER_URL` | `""` | OIDC issuer URL (moved to a secret when `auth.oidcClientId` is set) |
+| `api.env.OIDC_ISSUER_URL` | `""` | OIDC issuer URL |
 | `api.extraEnv` | `[]` | Additional env vars for the API pod (see [extraEnv docs](#extraenv)) |
 | `api.extraVolumes` | `[]` | Additional pod-level volumes (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
 | `api.extraVolumeMounts` | `[]` | Additional container volume mounts (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
@@ -173,6 +179,9 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `mariadb.persistence.size` | `"10Gi"` | PVC size (ignored when external) |
 | `mariadb.podSecurityContext` | `{runAsNonRoot: true, fsGroup: 999}` | Pod-level security context |
 | `mariadb.resources` | `{requests: {cpu: 200m, memory: 512Mi}, limits: {cpu: 1, memory: 1Gi}}` | Container resource limits/requests |
+| `mariadb.nodeSelector` | `{}` | Node selector |
+| `mariadb.tolerations` | `[]` | Pod tolerations |
+| `mariadb.affinity` | `{}` | Pod affinity/anti-affinity |
 
 ### Valkey
 
@@ -186,6 +195,9 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `valkey.storageClass` | `""` | PVC storage class (ignored when external) |
 | `valkey.persistence.size` | `"1Gi"` | PVC size (ignored when external) |
 | `valkey.resources` | `{requests: {cpu: 100m, memory: 128Mi}, limits: {cpu: 500m, memory: 512Mi}}` | Container resource limits/requests |
+| `valkey.nodeSelector` | `{}` | Node selector |
+| `valkey.tolerations` | `[]` | Pod tolerations |
+| `valkey.affinity` | `{}` | Pod affinity/anti-affinity |
 
 ### Database
 
@@ -208,9 +220,9 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | Name | Default | Description |
 |---|---|---|
 | `auth.apiKey` | `""` | API key for `X-API-Key` header |
-| `auth.oidcClientId` | `""` | OIDC client ID (injected into API + frontend; when set, overrides ConfigMap value via the oidc secret) |
+| `auth.oidcClientId` | `""` | OIDC client ID (injected into API + frontend from the oidc secret) |
 | `auth.oidcClientSecret` | `""` | OIDC client secret for the frontend (injected only when `USE_SOCIAL_LOGIN=true`) |
-| `auth.githubClientId` | `""` | GitHub client ID (injected into API + frontend; when set, overrides ConfigMap value via the github secret) |
+| `auth.githubClientId` | `""` | GitHub client ID (injected into API + frontend from the github secret) |
 | `auth.githubClientSecret` | `""` | GitHub OAuth client secret for the frontend (injected only when `USE_SOCIAL_LOGIN=true`) |
 | `auth.authSecret` | `"dev-secret-change-in-production"` | NextAuth encryption key — signs JWTs and encrypts session cookies. Generate one with `openssl rand -base64 32` |
 | `auth.apiKeyExistingSecret` | `""` | Name of an existing Secret containing the API key (overrides the chart-generated auth secret) |
@@ -271,10 +283,15 @@ shared volume that both the API and worker mount. The worker reads the file via
 
 | Name | Default | Description |
 |---|---|---|
-| `caCert.enabled` | `false` | Mount a custom CA certificate |
-| `caCert.path` | `"/etc/ssl/certs/ca.crt"` | Mount path inside the container |
-| `caCert.existingSecret` | `""` | Name of an existing Secret (must contain key named `ca.crt`) |
-| `caCert.key` | `"ca.crt"` | Key within the secret |
+| `caCert.enabled` | `false` | Mount a custom CA certificate into the API and worker pods |
+| `caCert.path` | `"/etc/ssl/certs/ca.crt"` | Path the certificate file is mounted at (also set via `CA_CERT`) |
+| `caCert.existingConfigMap` | `""` | Name of an existing ConfigMap containing the CA cert (required when enabled; must contain `key`) |
+| `caCert.key` | `"ca.crt"` | Key within the ConfigMap |
+
+When `caCert.enabled`, the cert file from `caCert.existingConfigMap` is mounted
+read-only at `caCert.path` in the API and worker containers and `CA_CERT` is
+set to that path, so all HTTPS clients trust the private CA. A ConfigMap is
+used because a CA bundle is public data and needs no secret protection.
 
 ### extraEnv
 

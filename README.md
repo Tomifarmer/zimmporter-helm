@@ -257,7 +257,7 @@ yt-dlp PO-token extraction for age-restricted content.
 | `potProvider.image.tag` | `"1.3.1"` | Provider image tag |
 | `potProvider.image.pullPolicy` | `IfNotPresent` | Image pull policy |
 | `potProvider.port` | `4416` | HTTP port (service + container) |
-| `potProvider.probes.enabled` | `true` | Enable HTTP liveness/readiness probes on `/api/v1/health` |
+| `potProvider.probes.enabled` | `true` | Enable HTTP liveness/readiness probes on `/ping` |
 | `potProvider.resources` | `{requests: {cpu: 50m, memory: 64Mi}, limits: {cpu: 200m, memory: 256Mi}}` | Container resource limits/requests |
 | `potProvider.podSecurityContext` | `{runAsNonRoot: true}` | Pod-level security context |
 | `potProvider.nodeSelector` | `{}` | Node selector |
@@ -373,7 +373,7 @@ frontend:
 |---|---|---|
 | `Deployment` | `{release}-zimmporter-api` | FastAPI, `/health` probe, writable cookies volume at `/var/zimmporter/cookies`; also runs the periodic S3 library index dispatcher (`api.indexIntervalMinutes`) |
 | `Deployment` | `{release}-zimmporter-worker` | Celery, `emptyDir` at `/data/zimmer/importer`, `inspect ping` probe, read-only cookies volume |
-| `Deployment` (conditional) | `{release}-zimmporter-bgutil-provider` | POT provider, `/api/v1/health` probe; skipped when `potProvider.enabled=false` |
+| `Deployment` (conditional) | `{release}-zimmporter-bgutil-provider` | POT provider, `/ping` probe; skipped when `potProvider.enabled=false` |
 | `Deployment` | `{release}-zimmporter-frontend` | Next.js, HTTP probe on `/` |
 | `StatefulSet` (conditional) | `{release}-zimmporter-valkey` | Skipped when `valkey.external.enabled=true` |
 | `StatefulSet` (conditional) | `{release}-zimmporter-mariadb` | Skipped when `mariadb.external.enabled=true` |

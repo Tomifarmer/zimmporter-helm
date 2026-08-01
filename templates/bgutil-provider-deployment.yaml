@@ -51,13 +51,13 @@ spec:
           {{- if .Values.potProvider.probes.enabled }}
           livenessProbe:
             httpGet:
-              path: /api/v1/health
+              path: /ping
               port: {{ .Values.potProvider.port }}
             initialDelaySeconds: {{ .Values.potProvider.probes.liveness.initialDelaySeconds | default 10 }}
             periodSeconds: {{ .Values.potProvider.probes.liveness.periodSeconds | default 15 }}
           readinessProbe:
             httpGet:
-              path: /api/v1/health
+              path: /ping
               port: {{ .Values.potProvider.port }}
             initialDelaySeconds: {{ .Values.potProvider.probes.readiness.initialDelaySeconds | default 5 }}
             periodSeconds: {{ .Values.potProvider.probes.readiness.periodSeconds | default 10 }}

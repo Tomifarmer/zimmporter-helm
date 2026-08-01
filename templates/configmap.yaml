@@ -14,6 +14,7 @@ data:
   CORS_ALLOWED_ORIGINS: {{ .Values.api.env.CORS_ALLOWED_ORIGINS | quote }}
   OIDC_ISSUER_URL: {{ .Values.api.env.OIDC_ISSUER_URL | quote }}
   API_PROXY_FETCH: {{ .Values.api.env.API_PROXY_FETCH | quote }}
+  INDEX_INTERVAL_MINUTES: {{ .Values.api.indexIntervalMinutes | toString | quote }}
   COOKIE_DIR: {{ .Values.cookies.dir | quote }}
 {{- if .Values.caCert.enabled }}
   CA_CERT: {{ .Values.caCert.path | quote }}

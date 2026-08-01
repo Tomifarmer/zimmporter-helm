@@ -79,6 +79,8 @@ api:
     CORS_ALLOWED_ORIGINS: "*"
     OIDC_ISSUER_URL: ""
     API_PROXY_FETCH: "false"
+  # How often (minutes) the API pod dispatches the S3 library index task.
+  indexIntervalMinutes: 30
   extraEnv: []
   extraVolumes: []
   extraVolumeMounts: []

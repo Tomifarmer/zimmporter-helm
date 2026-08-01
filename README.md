@@ -65,7 +65,7 @@ curl http://localhost:8000/health
 |---|---|---|
 | `nameOverride` | `""` | Overrides the `app.kubernetes.io/name` label |
 | `fullnameOverride` | `""` | Overrides the full resource name prefix |
-| `global.extraEnv` | `[]` | Additional env vars injected into **all** pods (see [extraEnv docs](#extraenv)) |
+| `global.extraEnv` | `[]` | Additional env vars injected into **all** pods, including Valkey, MariaDB, and bgutil-provider (see [extraEnv docs](#extraenv)) |
 
 ### Images
 
@@ -115,6 +115,8 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `api.env.USE_SOCIAL_LOGIN` | `"false"` | Enable social login (OIDC/GitHub) Bearer token authentication |
 | `api.env.CORS_ALLOWED_ORIGINS` | `"*"` | CORS allowed origins |
 | `api.env.OIDC_ISSUER_URL` | `""` | OIDC issuer URL |
+| `api.env.API_PROXY_FETCH` | `"false"` | Proxy thumbnail fetches through the API; thumbnails embedded as base64 data URIs in search results |
+| `api.indexIntervalMinutes` | `30` | How often (minutes) the API pod dispatches the periodic S3 library index scan (`INDEX_INTERVAL_MINUTES`; min `1`) |
 | `api.extraEnv` | `[]` | Additional env vars for the API pod (see [extraEnv docs](#extraenv)) |
 | `api.extraVolumes` | `[]` | Additional pod-level volumes (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
 | `api.extraVolumeMounts` | `[]` | Additional container volume mounts (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
@@ -257,7 +259,7 @@ yt-dlp PO-token extraction for age-restricted content.
 | `potProvider.port` | `4416` | HTTP port (service + container) |
 | `potProvider.probes.enabled` | `true` | Enable HTTP liveness/readiness probes on `/api/v1/health` |
 | `potProvider.resources` | `{requests: {cpu: 50m, memory: 64Mi}, limits: {cpu: 200m, memory: 256Mi}}` | Container resource limits/requests |
-| `potProvider.podSecurityContext` | `{}` | Pod-level security context |
+| `potProvider.podSecurityContext` | `{runAsNonRoot: true}` | Pod-level security context |
 | `potProvider.nodeSelector` | `{}` | Node selector |
 | `potProvider.tolerations` | `[]` | Pod tolerations |
 | `potProvider.affinity` | `{}` | Pod affinity/anti-affinity |
@@ -266,8 +268,9 @@ yt-dlp PO-token extraction for age-restricted content.
 ### Cookies (YouTube auth)
 
 Cookies uploaded through the UI (`POST /cookies` on the API) are stored in a
-shared volume that both the API and worker mount. The worker reads the file via
-`YTDLP_COOKIEFILE` for age-restricted download auth.
+shared volume that both the API and worker mount. The API receives `COOKIE_DIR`
+(the writable mount path) and the worker reads the file via `YTDLP_COOKIEFILE`
+(`cookies.workerMountPath`/`cookies.filename`) for age-restricted download auth.
 
 | Name | Default | Description |
 |---|---|---|
@@ -307,6 +310,26 @@ precedence over global ones.
 | `worker.extraEnv` | `[]` | Applied to the worker pod only |
 | `frontend.extraEnv` | `[]` | Applied to the frontend pod only |
 
+`global.extraEnv` is also merged into the Valkey, MariaDB, and bgutil-provider
+pods (the provider combines it with `potProvider.extraEnv`).
+
+Each entry follows the standard Kubernetes `env` schema:
+
+```yaml
+extraEnv:
+  - name: MY_VAR
+    value: "plain value"
+  - name: SECRET_VAR
+    valueFrom:
+      secretKeyRef:
+        name: my-secret
+        key: my-key
+  - name: POD_IP
+    valueFrom:
+      fieldRef:
+        fieldPath: status.podIP
+```
+
 ### extraVolumes / extraVolumeMounts
 
 Each component (`api`, `worker`, `frontend`) accepts `extraVolumes` and
@@ -337,30 +360,11 @@ frontend:
 
 ---
 
-Each entry follows the standard Kubernetes `env` schema:
-
-```yaml
-extraEnv:
-  - name: MY_VAR
-    value: "plain value"
-  - name: SECRET_VAR
-    valueFrom:
-      secretKeyRef:
-        name: my-secret
-        key: my-key
-  - name: POD_IP
-    valueFrom:
-      fieldRef:
-        fieldPath: status.podIP
-```
-
----
-
 ## Resources created
 
 | Kind | Name pattern | Notes |
 |---|---|---|
-| `Deployment` | `{release}-zimmporter-api` | FastAPI, `/health` probe, writable cookies volume at `/var/zimmporter/cookies` |
+| `Deployment` | `{release}-zimmporter-api` | FastAPI, `/health` probe, writable cookies volume at `/var/zimmporter/cookies`; also runs the periodic S3 library index dispatcher (`api.indexIntervalMinutes`) |
 | `Deployment` | `{release}-zimmporter-worker` | Celery, `emptyDir` at `/data/zimmer/importer`, `inspect ping` probe, read-only cookies volume |
 | `Deployment` (conditional) | `{release}-zimmporter-bgutil-provider` | POT provider, `/api/v1/health` probe; skipped when `potProvider.enabled=false` |
 | `Deployment` | `{release}-zimmporter-frontend` | Next.js, HTTP probe on `/` |
@@ -383,6 +387,9 @@ extraEnv:
 - **API**: `GET /health` returns per-component status (Valkey, Celery, MariaDB).
 - **Worker**: Liveness probe runs `celery -A tasks.celery_app inspect ping --timeout=5`.
 - **Frontend**: Liveness and readiness probes hit `/` on port 3000.
+
+The API and worker deployments use init containers to wait for MariaDB and
+Valkey to be reachable before the main container starts.
 
 ---
 
@@ -409,8 +416,6 @@ ingress:
           - app.zimmporter.example
         secretName: frontend-tls
 ```
-
----
 
 ---
 

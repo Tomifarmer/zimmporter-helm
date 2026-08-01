@@ -96,6 +96,13 @@ spec:
                 secretKeyRef:
                   name: {{ include "zimmporter.s3SecretName" . }}
                   key: {{ .Values.s3.existingSecretKeyMapping.secretKey }}
+          {{- if or .Values.navidrome.existingSecret .Values.navidrome.password }}
+            - name: NAVIDROME_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "zimmporter.navidromeSecretName" . }}
+                  key: {{ .Values.navidrome.existingSecretKeyMapping.password }}
+          {{- end }}
           {{- with .Values.global.extraEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}

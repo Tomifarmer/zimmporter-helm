@@ -116,7 +116,8 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `api.env.CORS_ALLOWED_ORIGINS` | `"*"` | CORS allowed origins |
 | `api.env.OIDC_ISSUER_URL` | `""` | OIDC issuer URL |
 | `api.env.API_PROXY_FETCH` | `"false"` | Proxy thumbnail fetches through the API; thumbnails embedded as base64 data URIs in search results |
-| `api.indexIntervalMinutes` | `30` | How often (minutes) the API pod dispatches the periodic S3 library index scan (`INDEX_INTERVAL_MINUTES`; min `1`) |
+| `api.indexSource` | `"s3"` | Which library sources feed the available-albums index (`INDEX_SOURCE`): `s3` (default), `navidrome`, or `both` |
+| `api.indexIntervalMinutes` | `30` | How often (minutes) the API pod dispatches the periodic library index scan (`INDEX_INTERVAL_MINUTES`; min `1`) |
 | `api.extraEnv` | `[]` | Additional env vars for the API pod (see [extraEnv docs](#extraenv)) |
 | `api.extraVolumes` | `[]` | Additional pod-level volumes (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
 | `api.extraVolumeMounts` | `[]` | Additional container volume mounts (see [extraVolumes docs](#extravolumes--extravolumemounts)) |
@@ -168,6 +169,21 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `s3.existingSecret` | `""` | Name of an existing Secret (skips chart-generated s3 secret) |
 | `s3.existingSecretKeyMapping.accessKey` | `"access-key"` | Key for S3 access key in the existing secret |
 | `s3.existingSecretKeyMapping.secretKey` | `"secret-key"` | Key for S3 secret key in the existing secret |
+
+### Navidrome (optional index source)
+
+When `api.indexSource` is `navidrome` or `both`, the worker queries
+Navidrome's Subsonic API (`getAlbumList2`) to populate the available-albums
+index — a tag-accurate view of the library.
+
+| Name | Default | Description |
+|---|---|---|
+| `navidrome.url` | `""` | Navidrome base URL (worker `NAVIDROME_URL`) |
+| `navidrome.user` | `""` | Subsonic API username (worker `NAVIDROME_USER`) |
+| `navidrome.password` | `""` | Subsonic API password (worker `NAVIDROME_PASS`; ignored when `existingSecret` is set) |
+| `navidrome.existingSecret` | `""` | Name of an existing Secret (skips chart-generated navidrome secret) |
+| `navidrome.existingSecretKeyMapping.user` | `"user"` | Key for the username in the existing secret |
+| `navidrome.existingSecretKeyMapping.password` | `"password"` | Key for the password in the existing secret |
 
 ### MariaDB
 
@@ -371,7 +387,7 @@ frontend:
 
 | Kind | Name pattern | Notes |
 |---|---|---|
-| `Deployment` | `{release}-zimmporter-api` | FastAPI, `/health` probe, writable cookies volume at `/var/zimmporter/cookies`; also runs the periodic S3 library index dispatcher (`api.indexIntervalMinutes`) |
+| `Deployment` | `{release}-zimmporter-api` | FastAPI, `/health` probe, writable cookies volume at `/var/zimmporter/cookies`; also runs the periodic library index dispatcher (`api.indexIntervalMinutes`) |
 | `Deployment` | `{release}-zimmporter-worker` | Celery, `emptyDir` at `/data/zimmer/importer`, `inspect ping` probe, read-only cookies volume |
 | `Deployment` (conditional) | `{release}-zimmporter-bgutil-provider` | POT provider, `/ping` probe; skipped when `potProvider.enabled=false` |
 | `Deployment` | `{release}-zimmporter-frontend` | Next.js, HTTP probe on `/` |
@@ -383,6 +399,7 @@ frontend:
 | `ConfigMap` (×3) | `*-api-config`, `*-worker-config`, `*-frontend-config` | Non-sensitive environment variables |
 | `Secret` (conditional) | `*-database` | Skipped when `database.existingSecret` is set |
 | `Secret` | `*-s3` | Always created |
+| `Secret` (conditional) | `*-navidrome` | Created when `navidrome.password` is set and `navidrome.existingSecret` is empty |
 | `Secret` | `*-api-and-front-auth` | Always created (holds api-key and auth-secret) |
 | `Secret` (conditional) | `*-auth-oidc` | Skipped when `auth.oidc.existingSecret` is set |
 | `Secret` (conditional) | `*-auth-github` | Skipped when `auth.github.existingSecret` is set |
@@ -503,6 +520,12 @@ auth:
     # existingSecretKeyMapping:
     #   clientId: GITHUB_CLIENT_ID
     #   clientSecret: GITHUB_CLIENT_SECRET
+
+navidrome:
+  existingSecret: my-navidrome-creds
+  # existingSecretKeyMapping:
+  #   user: NAVIDROME_USER
+  #   password: NAVIDROME_PASS
 ```
 
 The expected keys in your existing secret (defaults):
@@ -513,6 +536,7 @@ The expected keys in your existing secret (defaults):
 | `my-api-key` | `api-key` |
 | `my-oidc-creds` | `client-id`, `client-secret` |
 | `my-github-creds` | `github-client-id`, `github-client-secret` |
+| `my-navidrome-creds` | `user`, `password` |
 
 When `database.existingSecret` or `auth.oidc.existingSecret` is set, the
 chart skips creating its own Secret and uses yours directly.

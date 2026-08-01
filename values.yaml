@@ -79,7 +79,10 @@ api:
     CORS_ALLOWED_ORIGINS: "*"
     OIDC_ISSUER_URL: ""
     API_PROXY_FETCH: "false"
-  # How often (minutes) the API pod dispatches the S3 library index task.
+  # Which library sources feed the `available_albums` index:
+  # "s3" (default), "navidrome", or "both".
+  indexSource: s3
+  # How often (minutes) the API pod dispatches the library index task.
   indexIntervalMinutes: 30
   extraEnv: []
   extraVolumes: []
@@ -150,6 +153,19 @@ s3:
   existingSecretKeyMapping:
     accessKey: access-key
     secretKey: secret-key
+
+# ── Navidrome (optional library index source) ───────────────────────
+# When `api.indexSource` is "navidrome" or "both", the worker queries
+# Navidrome's Subsonic API to populate the available-albums index.
+navidrome:
+  url: ""
+  user: ""
+  password: ""
+  # Reference an existing Secret instead of generating one.
+  existingSecret: ""
+  existingSecretKeyMapping:
+    user: user
+    password: password
 
 # ── MariaDB ─────────────────────────────────────────────────────────
 mariadb:

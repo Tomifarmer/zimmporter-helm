@@ -71,6 +71,14 @@ app.kubernetes.io/component: bgutil-provider
 {{- end }}
 {{- end }}
 
+{{- define "zimmporter.navidromeSecretName" -}}
+{{- if .Values.navidrome.existingSecret }}
+{{- .Values.navidrome.existingSecret }}
+{{- else }}
+{{- include "zimmporter.fullname" . }}-navidrome
+{{- end }}
+{{- end }}
+
 {{- define "zimmporter.authSecretName" -}}
 {{- include "zimmporter.fullname" . }}-api-and-front-auth
 {{- end }}

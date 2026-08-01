@@ -129,6 +129,10 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `worker.replicas` | `1` | Number of worker pods |
 | `worker.podSecurityContext` | `{fsGroup: 51000}` | Pod-level security context |
 | `worker.resources` | `{requests: {cpu: 200m, memory: 256Mi}, limits: {cpu: 1, memory: 1Gi}}` | Container resource limits/requests |
+| `worker.livenessProbe.timeoutSeconds` | `10` | Liveness exec probe timeout (raise if killed under heavy load) |
+| `worker.livenessProbe.failureThreshold` | `3` | Consecutive failures before the container is killed |
+| `worker.livenessProbe.periodSeconds` | `30` | Probe interval |
+| `worker.livenessProbe.initialDelaySeconds` | `30` | Delay before probing starts |
 | `worker.concurrency` | `4` | Celery worker concurrency |
 | `worker.pool` | `"prefork"` | Celery worker pool type |
 | `worker.nodeSelector` | `{}` | Node selector |

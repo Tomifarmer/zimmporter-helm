@@ -139,8 +139,10 @@ spec:
                 - sh
                 - -c
                 - kill -0 1
-            initialDelaySeconds: 30
-            periodSeconds: 30
+            initialDelaySeconds: {{ .Values.worker.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.worker.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.worker.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.worker.livenessProbe.failureThreshold }}
           resources:
             {{- toYaml .Values.worker.resources | nindent 12 }}
       volumes:

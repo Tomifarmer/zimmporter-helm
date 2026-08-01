@@ -179,11 +179,16 @@ index — a tag-accurate view of the library.
 | Name | Default | Description |
 |---|---|---|
 | `navidrome.url` | `""` | Navidrome base URL (worker `NAVIDROME_URL`) |
-| `navidrome.user` | `""` | Subsonic API username (worker `NAVIDROME_USER`) |
+| `navidrome.user` | `""` | Subsonic API username (stored in the generated secret; `NAVIDROME_USER` is sourced from the secret, see below) |
 | `navidrome.password` | `""` | Subsonic API password (worker `NAVIDROME_PASS`; ignored when `existingSecret` is set) |
 | `navidrome.existingSecret` | `""` | Name of an existing Secret (skips chart-generated navidrome secret) |
 | `navidrome.existingSecretKeyMapping.user` | `"user"` | Key for the username in the existing secret |
 | `navidrome.existingSecretKeyMapping.password` | `"password"` | Key for the password in the existing secret |
+
+Both `NAVIDROME_USER` and `NAVIDROME_PASS` are injected into the worker from the
+secret (`navidrome.existingSecret`, or the chart-generated one when `navidrome.password`
+is set). With an existing secret, do **not** rely on `navidrome.user` — the username is
+read from the secret's `user` key.
 
 ### MariaDB
 

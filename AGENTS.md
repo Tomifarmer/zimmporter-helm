@@ -18,7 +18,7 @@ No test suite exists (no `helm test` templates, no chart-testing framework).
 
 ## Architecture
 
-Single v2 chart. 14 templates, one `_helpers.tpl`, one `values.yaml`.
+Single v2 chart. 16 templates, one `_helpers.tpl`, one `values.yaml`.
 
 | Component | Kind | Conditional |
 |-----------|------|-------------|
@@ -27,6 +27,8 @@ Single v2 chart. 14 templates, one `_helpers.tpl`, one `values.yaml`.
 | frontend | Deployment | always |
 | valkey | StatefulSet | skipped when `valkey.external.enabled` |
 | mariadb | StatefulSet | skipped when `mariadb.external.enabled` |
+| bgutil-provider | Deployment | skipped when `potProvider.enabled=false` |
+| cookies | PersistentVolumeClaim | skipped when `cookies.persistence.enabled=false` |
 
 External service pattern: `<component>.external.enabled` + `.host`/`.address` + `.port` (used by valkey and mariadb).
 

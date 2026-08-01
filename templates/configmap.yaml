@@ -16,6 +16,7 @@ data:
   OIDC_CLIENT_ID: {{ .Values.api.env.OIDC_CLIENT_ID | quote }}
   GITHUB_CLIENT_ID: {{ .Values.api.env.GITHUB_CLIENT_ID | quote }}
   API_PROXY_FETCH: {{ .Values.api.env.API_PROXY_FETCH | quote }}
+  COOKIE_DIR: {{ .Values.cookies.dir | quote }}
 {{- if .Values.caCert.enabled }}
   CA_CERT: {{ .Values.caCert.path | quote }}
 {{- end }}
@@ -34,6 +35,10 @@ data:
   AWS_ENDPOINT_URL: {{ .Values.s3.endpoint | quote }}
   AWS_USE_SSL: {{ .Values.s3.useSSL | toString | quote }}
   AWS_BUCKET: {{ .Values.s3.bucket | quote }}
+  YTDLP_COOKIEFILE: {{ printf "%s/%s" .Values.cookies.workerMountPath .Values.cookies.filename | quote }}
+  {{- if .Values.potProvider.enabled }}
+  POT_PROVIDER_URL: {{ include "zimmporter.potProviderUrl" . | quote }}
+  {{- end }}
 {{- if .Values.caCert.enabled }}
   CA_CERT: {{ .Values.caCert.path | quote }}
 {{- end }}

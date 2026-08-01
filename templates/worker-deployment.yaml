@@ -109,6 +109,9 @@ spec:
               mountPath: /data/zimmer/importer
             - name: tmp
               mountPath: /tmp
+            - name: cookies
+              mountPath: {{ .Values.cookies.workerMountPath | quote }}
+              readOnly: true
           {{- with .Values.worker.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -127,6 +130,14 @@ spec:
           emptyDir: {}
         - name: tmp
           emptyDir: {}
+        {{- if .Values.cookies.persistence.enabled }}
+        - name: cookies
+          persistentVolumeClaim:
+            claimName: {{ include "zimmporter.cookiesVolumeName" . }}
+        {{- else }}
+        - name: cookies
+          emptyDir: {}
+        {{- end }}
       {{- with .Values.worker.extraVolumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}

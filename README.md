@@ -3,12 +3,13 @@
 Deploys the Zimmporter stack on Kubernetes:
 
 | Component | Description |
-|---|---|
+|---|---|---|
 | **api** | FastAPI application — search, download orchestration, job management |
 | **worker** | Celery worker — executes album/playlist downloads via yt-dlp |
 | **frontend** | Next.js UI — search, job status, download management |
 | **valkey** | Redis-compatible KV store — Celery broker & result backend |
 | **mariadb** | SQL database — job and song metadata |
+| **bgutil-provider** | BgUtils yt-dlp POT provider — supplies PO tokens for age-restricted content |
 
 S3-compatible object storage is expected to be pre-provisioned
 and configured via values — it is **not** deployed by this chart.
@@ -19,7 +20,9 @@ and configured via values — it is **not** deployed by this chart.
 
 - Kubernetes 1.25+
 - Helm 3.8+
-- A default `StorageClass` (or set one explicitly for Valkey / MariaDB)
+- A default `StorageClass` (or set one explicitly for Valkey / MariaDB / cookies)
+- A `StorageClass` with `ReadWriteMany` access (or a provider that supports
+  shared volumes) for the cookies volume — both the API and worker pods mount it
 - An S3-compatible instance reachable from the cluster
 
 ---
@@ -226,6 +229,44 @@ Both ingresses are **disabled by default**. Enable them per-component.
 | `celery.broker` | `""` | Broker URL (auto-derived from in-cluster Valkey when empty) |
 | `celery.backend` | `""` | Result backend URL (auto-derived from in-cluster Valkey when empty) |
 
+### POT provider (bgutil-provider)
+
+The chart deploys the [BgUtils yt-dlp POT provider](https://github.com/Brainicism/bgutil-ytdlp-pot-provider)
+and injects its URL into the worker via `POT_PROVIDER_URL`, enabling
+yt-dlp PO-token extraction for age-restricted content.
+
+| Name | Default | Description |
+|---|---|---|
+| `potProvider.enabled` | `true` | Deploy the POT provider deployment + service |
+| `potProvider.replicas` | `1` | Number of provider pods |
+| `potProvider.image.repository` | `"brainicism/bgutil-ytdlp-pot-provider"` | Provider image |
+| `potProvider.image.tag` | `"1.3.1"` | Provider image tag |
+| `potProvider.image.pullPolicy` | `IfNotPresent` | Image pull policy |
+| `potProvider.port` | `4416` | HTTP port (service + container) |
+| `potProvider.probes.enabled` | `true` | Enable HTTP liveness/readiness probes on `/api/v1/health` |
+| `potProvider.resources` | `{requests: {cpu: 50m, memory: 64Mi}, limits: {cpu: 200m, memory: 256Mi}}` | Container resource limits/requests |
+| `potProvider.podSecurityContext` | `{}` | Pod-level security context |
+| `potProvider.nodeSelector` | `{}` | Node selector |
+| `potProvider.tolerations` | `[]` | Pod tolerations |
+| `potProvider.affinity` | `{}` | Pod affinity/anti-affinity |
+| `potProvider.extraEnv` | `[]` | Additional env vars for the provider pod |
+
+### Cookies (YouTube auth)
+
+Cookies uploaded through the UI (`POST /cookies` on the API) are stored in a
+shared volume that both the API and worker mount. The worker reads the file via
+`YTDLP_COOKIEFILE` for age-restricted download auth.
+
+| Name | Default | Description |
+|---|---|---|
+| `cookies.dir` | `"/var/zimmporter/cookies"` | API-side mount path (writable, holds `cookies.txt`) |
+| `cookies.workerMountPath` | `"/etc/zimmporter/cookies"` | Worker-side mount path (read-only) |
+| `cookies.filename` | `"cookies.txt"` | Cookie file name inside the shared volume |
+| `cookies.persistence.enabled` | `true` | Create a PVC for the shared cookies volume |
+| `cookies.persistence.storageClass` | `""` | PVC storage class (default cluster `StorageClass` when empty) |
+| `cookies.persistence.accessModes` | `["ReadWriteMany"]` | PVC access modes — must support shared mounts |
+| `cookies.persistence.size` | `"1Gi"` | PVC size |
+
 ### Private CA
 
 | Name | Default | Description |
@@ -302,12 +343,14 @@ extraEnv:
 
 | Kind | Name pattern | Notes |
 |---|---|---|
-| `Deployment` | `{release}-zimmporter-api` | FastAPI, `/health` probe |
-| `Deployment` | `{release}-zimmporter-worker` | Celery, `emptyDir` at `/data/zimmer/importer`, `inspect ping` probe |
+| `Deployment` | `{release}-zimmporter-api` | FastAPI, `/health` probe, writable cookies volume at `/var/zimmporter/cookies` |
+| `Deployment` | `{release}-zimmporter-worker` | Celery, `emptyDir` at `/data/zimmer/importer`, `inspect ping` probe, read-only cookies volume |
+| `Deployment` (conditional) | `{release}-zimmporter-bgutil-provider` | POT provider, `/api/v1/health` probe; skipped when `potProvider.enabled=false` |
 | `Deployment` | `{release}-zimmporter-frontend` | Next.js, HTTP probe on `/` |
 | `StatefulSet` (conditional) | `{release}-zimmporter-valkey` | Skipped when `valkey.external.enabled=true` |
 | `StatefulSet` (conditional) | `{release}-zimmporter-mariadb` | Skipped when `mariadb.external.enabled=true` |
-| `Service` (×3–5) | ClusterIP for each component | Valkey + MariaDB skipped when external |
+| `Service` (×4–6) | ClusterIP for each component | Valkey + MariaDB skipped when external |
+| `PersistentVolumeClaim` (conditional) | `{release}-zimmporter-cookies` | Shared RWX volume; skipped when `cookies.persistence.enabled=false` |
 | `Ingress` (×2) | Only when enabled | Separate hostnames for API and frontend |
 | `ConfigMap` (×3) | `*-api-config`, `*-worker-config`, `*-frontend-config` | Non-sensitive environment variables |
 | `Secret` (conditional) | `*-database` | Skipped when `database.existingSecret` is set |
@@ -453,7 +496,7 @@ chart skips creating its own Secret and uses yours directly.
 helm uninstall my-release
 ```
 
-Persistent volume claims for Valkey and MariaDB are **not** deleted by
+Persistent volume claims for Valkey, MariaDB, and cookies are **not** deleted by
 default. Remove them manually if needed:
 
 ```bash

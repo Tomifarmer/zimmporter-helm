@@ -98,8 +98,10 @@ spec:
           {{- with .Values.api.extraEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.api.extraVolumeMounts }}
           volumeMounts:
+            - name: cookies
+              mountPath: {{ .Values.cookies.dir | quote }}
+          {{- with .Values.api.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
           livenessProbe:
@@ -130,7 +132,15 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.api.extraVolumes }}
       volumes:
+        {{- if .Values.cookies.persistence.enabled }}
+        - name: cookies
+          persistentVolumeClaim:
+            claimName: {{ include "zimmporter.cookiesVolumeName" . }}
+        {{- else }}
+        - name: cookies
+          emptyDir: {}
+        {{- end }}
+      {{- with .Values.api.extraVolumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}

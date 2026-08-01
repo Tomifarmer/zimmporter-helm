@@ -50,6 +50,11 @@ app.kubernetes.io/component: valkey
 app.kubernetes.io/component: mariadb
 {{- end }}
 
+{{- define "zimmporter.bgutilSelectorLabels" -}}
+{{ include "zimmporter.selectorLabels" . }}
+app.kubernetes.io/component: bgutil-provider
+{{- end }}
+
 {{- define "zimmporter.imagePullSecret" -}}
 {{- if .Values.images.api.pullSecret }}
 {"auths":{"https://index.docker.io/v1/":{"auth":"{{ .Values.images.api.pullSecret }}"}}}
@@ -156,4 +161,12 @@ app.kubernetes.io/component: mariadb
 {{- $port := .Values.valkey.external.port | toString | default "6379" }}
 {{- printf "redis://%s:%s/1" $addr $port }}
 {{- end }}
+{{- end }}
+
+{{- define "zimmporter.potProviderUrl" -}}
+{{- printf "http://%s-bgutil-provider:%s" (include "zimmporter.fullname" .) (.Values.potProvider.port | toString) }}
+{{- end }}
+
+{{- define "zimmporter.cookiesVolumeName" -}}
+{{- include "zimmporter.fullname" . }}-cookies
 {{- end }}

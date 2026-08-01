@@ -197,6 +197,56 @@ celery:
   broker: ""
   backend: ""
 
+# ── BgUtils POT provider (yt-dlp PO tokens) ─────────────────────────
+potProvider:
+  enabled: true
+  image:
+    repository: brainicism/bgutil-ytdlp-pot-provider
+    tag: "1.3.1"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  port: 4416
+  podSecurityContext: {}
+  probes:
+    enabled: true
+    liveness:
+      initialDelaySeconds: 10
+      periodSeconds: 15
+    readiness:
+      initialDelaySeconds: 5
+      periodSeconds: 10
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  extraEnv: []
+
+# ── YouTube cookies (shared volume between API and worker) ──────────
+# The API writes the uploaded cookies file here; the worker mounts the
+# same volume read-only via YTDLP_COOKIEFILE.
+cookies:
+  # Directory the API writes cookies into (mounted from the shared PVC).
+  dir: /var/zimmporter/cookies
+  # Worker-side mount path (same PVC, mounted read-only).
+  workerMountPath: /etc/zimmporter/cookies
+  # Cookie file name inside the shared volume.
+  filename: cookies.txt
+  persistence:
+    enabled: true
+    # StorageClass for the cookies PVC (default cluster StorageClass when empty).
+    # Requires ReadWriteMany (or a storage class that allows shared access)
+    # because both the API and worker pods mount the same volume.
+    storageClass: ""
+    accessModes:
+      - ReadWriteMany
+    size: 1Gi
+
 # ── Database credentials ────────────────────────────────────────────
 database:
   host: ""

@@ -416,6 +416,14 @@ frontend:
 The API and worker deployments use init containers to wait for MariaDB and
 Valkey to be reachable before the main container starts.
 
+## Config changes trigger pod rollouts
+
+The API, worker, and frontend deployments carry a `checksum/config` annotation
+computed over the ConfigMap file, so any change to the ConfigMaps (e.g. a new
+`api.indexSource` or `navidrome.*` value) automatically rolls the affected pods
+to pick up the new environment variables. No manual `kubectl rollout restart`
+is needed after a `helm upgrade`.
+
 ---
 
 ## Example: enable ingresses with TLS

@@ -273,6 +273,7 @@ yt-dlp PO-token extraction for age-restricted content.
 | `potProvider.image.tag` | `"1.3.1"` | Provider image tag |
 | `potProvider.image.pullPolicy` | `IfNotPresent` | Image pull policy |
 | `potProvider.port` | `4416` | HTTP port (service + container) |
+| `potProvider.terminationGracePeriodSeconds` | `5` | Pod termination grace period (the provider doesn't exit gracefully on SIGTERM, so a short value avoids the default 30s hang) |
 | `potProvider.probes.enabled` | `true` | Enable HTTP liveness/readiness probes on `/ping` |
 | `potProvider.resources` | `{requests: {cpu: 50m, memory: 64Mi}, limits: {cpu: 200m, memory: 256Mi}}` | Container resource limits/requests |
 | `potProvider.podSecurityContext` | `{runAsNonRoot: true}` | Pod-level security context |

@@ -20,6 +20,7 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.potProvider.terminationGracePeriodSeconds | default 5 }}
       containers:
         - name: bgutil-provider
           image: "{{ .Values.potProvider.image.repository }}:{{ .Values.potProvider.image.tag }}"

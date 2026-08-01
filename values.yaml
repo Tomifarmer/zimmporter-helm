@@ -229,6 +229,10 @@ potProvider:
     pullPolicy: IfNotPresent
   replicas: 1
   port: 4416
+  # How long Kubernetes waits for the pod to exit before SIGKILL.  The
+  # provider does not shut down gracefully, so a short grace period avoids
+  # the default 30s hang on termination.
+  terminationGracePeriodSeconds: 5
   podSecurityContext:
     runAsNonRoot: true
   probes:

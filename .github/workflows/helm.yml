@@ -32,17 +32,10 @@ jobs:
       - name: Derive version
         id: version
         run: |
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            TAG="${{ github.ref_name }}"
-            VER="${TAG#v}"
-            echo "version=${VER}" >> "$GITHUB_OUTPUT"
-            echo "app_version=${VER}" >> "$GITHUB_OUTPUT"
-          else
-            VER=$(grep '^version:' Chart.yaml | awk '{print $2}')
-            AV=$(grep '^appVersion:' Chart.yaml | awk '{print $2}' | tr -d '"')
-            echo "version=${VER}" >> "$GITHUB_OUTPUT"
-            echo "app_version=${AV}" >> "$GITHUB_OUTPUT"
-          fi
+          TAG="${{ github.ref_name }}"
+          VER="${TAG#v}"
+          echo "version=${VER}" >> "$GITHUB_OUTPUT"
+          echo "app_version=${VER}" >> "$GITHUB_OUTPUT"
 
       - name: Lowercase owner
         run: echo "OWNER_LOWER=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
@@ -63,11 +56,13 @@ jobs:
           exit-code: 1
 
       - name: Login to GHCR
+        if: github.ref_type == 'tag'
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | \
             helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Package and push
+        if: github.ref_type == 'tag'
         run: |
           helm package . \
             --version "${{ steps.version.outputs.version }}" \

@@ -13,8 +13,7 @@ No test suite exists (no `helm test` templates, no chart-testing framework).
 
 ## CI
 
-- `.github/workflows/helm.yml` — lints, templates, runs Trivy (critical/high config), packages, and pushes to GHCR OCI on push to `main` or `v*` tags.
-- `.github/workflows/check-chart-version.yaml` — on `v*` tags, verifies `Chart.yaml version` matches the tag (stripped of `v`).
+- `.github/workflows/helm.yml` — lints, templates, and runs Trivy (critical/high config) on every push to `main`; on `v*` tags it also verifies `Chart.yaml version` matches the tag (stripped of `v`), then packages and pushes to GHCR OCI.
 
 ## Architecture
 

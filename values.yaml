@@ -239,12 +239,20 @@ potProvider:
 # The API writes the uploaded cookies file here; the worker mounts the
 # same volume read-only via YTDLP_COOKIEFILE.
 cookies:
-  # Directory the API writes cookies into (mounted from the shared PVC).
+  # Directory the API writes cookies into (mounted from the shared volume).
   dir: /var/zimmporter/cookies
-  # Worker-side mount path (same PVC, mounted read-only).
+  # Worker-side mount path (same volume, mounted read-only).
   workerMountPath: /etc/zimmporter/cookies
   # Cookie file name inside the shared volume.
   filename: cookies.txt
+  # Shared-volume backend. Priority: hostPath (when set) > PVC
+  # (persistence.enabled) > emptyDir (per-pod, not shared).
+  #
+  # hostPath is intended for single-node clusters that lack an RWX
+  # StorageClass (e.g. k3s local-path). The API and worker pods run on
+  # the same node, so they share this directory. Leave empty to use the
+  # PVC backend.
+  hostPath: ""
   persistence:
     enabled: true
     # StorageClass for the cookies PVC (default cluster StorageClass when empty).

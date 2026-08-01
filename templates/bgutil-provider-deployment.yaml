@@ -26,6 +26,7 @@ spec:
           imagePullPolicy: {{ .Values.global.imagePullPolicy | default .Values.potProvider.image.pullPolicy }}
           securityContext:
             runAsNonRoot: true
+            runAsUser: 1000
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
             capabilities:

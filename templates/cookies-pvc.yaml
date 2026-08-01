@@ -1,4 +1,4 @@
-{{- if .Values.cookies.persistence.enabled }}
+{{- if and .Values.cookies.persistence.enabled (not .Values.cookies.hostPath) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

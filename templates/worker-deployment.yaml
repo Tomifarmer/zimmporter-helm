@@ -134,7 +134,12 @@ spec:
           emptyDir: {}
         - name: tmp
           emptyDir: {}
-        {{- if .Values.cookies.persistence.enabled }}
+        {{- if .Values.cookies.hostPath }}
+        - name: cookies
+          hostPath:
+            path: {{ .Values.cookies.hostPath | quote }}
+            type: DirectoryOrCreate
+        {{- else if .Values.cookies.persistence.enabled }}
         - name: cookies
           persistentVolumeClaim:
             claimName: {{ include "zimmporter.cookiesVolumeName" . }}

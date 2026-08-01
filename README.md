@@ -277,10 +277,17 @@ shared volume that both the API and worker mount. The API receives `COOKIE_DIR`
 | `cookies.dir` | `"/var/zimmporter/cookies"` | API-side mount path (writable, holds `cookies.txt`) |
 | `cookies.workerMountPath` | `"/etc/zimmporter/cookies"` | Worker-side mount path (read-only) |
 | `cookies.filename` | `"cookies.txt"` | Cookie file name inside the shared volume |
-| `cookies.persistence.enabled` | `true` | Create a PVC for the shared cookies volume |
+| `cookies.hostPath` | `""` | Host directory to use as a shared volume (single-node clusters without an RWX StorageClass); created with `DirectoryOrCreate` when set |
+| `cookies.persistence.enabled` | `true` | Create a PVC for the shared cookies volume (ignored when `hostPath` is set) |
 | `cookies.persistence.storageClass` | `""` | PVC storage class (default cluster `StorageClass` when empty) |
 | `cookies.persistence.accessModes` | `["ReadWriteMany"]` | PVC access modes — must support shared mounts |
 | `cookies.persistence.size` | `"1Gi"` | PVC size |
+
+The default PVC backend requires a `StorageClass` with `ReadWriteMany` access
+(or a provider supporting shared volumes). On single-node clusters that only
+expose an RWO `StorageClass` (e.g. k3s `local-path`), set `cookies.hostPath`
+and `cookies.persistence.enabled: false` instead — the API and worker pods run
+on the same node and share the host directory.
 
 ### Private CA
 

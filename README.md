@@ -3,7 +3,7 @@
 Deploys the Zimmporter stack on Kubernetes:
 
 | Component | Description |
-|---|---|---|
+|---|---|
 | **api** | FastAPI application — search, download orchestration, job management |
 | **worker** | Celery worker — executes album/playlist downloads via yt-dlp |
 | **frontend** | Next.js UI — search, job status, download management |

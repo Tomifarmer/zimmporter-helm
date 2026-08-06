@@ -121,9 +121,6 @@ spec:
               mountPath: /data/zimmer/importer
             - name: tmp
               mountPath: /tmp
-            - name: cookies
-              mountPath: {{ .Values.cookies.workerMountPath | quote }}
-              readOnly: true
           {{- if and .Values.caCert.enabled .Values.caCert.existingConfigMap }}
             - name: ca-cert
               mountPath: {{ .Values.caCert.path | quote }}
@@ -150,19 +147,6 @@ spec:
           emptyDir: {}
         - name: tmp
           emptyDir: {}
-        {{- if .Values.cookies.hostPath }}
-        - name: cookies
-          hostPath:
-            path: {{ .Values.cookies.hostPath | quote }}
-            type: DirectoryOrCreate
-        {{- else if .Values.cookies.persistence.enabled }}
-        - name: cookies
-          persistentVolumeClaim:
-            claimName: {{ include "zimmporter.cookiesVolumeName" . }}
-        {{- else }}
-        - name: cookies
-          emptyDir: {}
-        {{- end }}
         {{- if and .Values.caCert.enabled .Values.caCert.existingConfigMap }}
         - name: ca-cert
           configMap:

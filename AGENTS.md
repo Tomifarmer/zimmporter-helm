@@ -17,7 +17,7 @@ No test suite exists (no `helm test` templates, no chart-testing framework).
 
 ## Architecture
 
-Single v2 chart. 15 templates, one `_helpers.tpl`, one `values.yaml`.
+Single v2 chart. 14 templates, one `_helpers.tpl`, one `values.yaml`.
 
 | Component | Kind | Conditional |
 |-----------|------|-------------|
@@ -27,9 +27,10 @@ Single v2 chart. 15 templates, one `_helpers.tpl`, one `values.yaml`.
 | valkey | StatefulSet | skipped when `valkey.external.enabled` |
 | mariadb | StatefulSet | skipped when `mariadb.external.enabled` |
 | bgutil-provider | Deployment | skipped when `potProvider.enabled=false` |
-| cookies | PersistentVolumeClaim | skipped when `cookies.persistence.enabled=false` |
 
 External service pattern: `<component>.external.enabled` + `.host`/`.address` + `.port` (used by valkey and mariadb).
+
+No shared cookies volume exists: the yt-dlp cookies file is uploaded via the API and stored in **Valkey** (db 3), which both the API and worker read.
 
 ## Security Context Pattern
 

@@ -20,9 +20,7 @@ and configured via values — it is **not** deployed by this chart.
 
 - Kubernetes 1.25+
 - Helm 3.8+
-- A default `StorageClass` (or set one explicitly for Valkey / MariaDB / cookies)
-- A `StorageClass` with `ReadWriteMany` access (or a provider that supports
-  shared volumes) for the cookies volume — both the API and worker pods mount it
+- A default `StorageClass` (or set one explicitly for Valkey / MariaDB)
 - An S3-compatible instance reachable from the cluster
 
 ---
@@ -293,27 +291,15 @@ yt-dlp PO-token extraction for age-restricted content.
 
 ### Cookies (YouTube auth)
 
-Cookies uploaded through the UI (`POST /cookies` on the API) are stored in a
-shared volume that both the API and worker mount. The API receives `COOKIE_DIR`
-(the writable mount path) and the worker reads the file via `YTDLP_COOKIEFILE`
-(`cookies.workerMountPath`/`cookies.filename`) for age-restricted download auth.
+Cookies uploaded through the UI (`POST /cookies` on the API) are stored directly in
+**Valkey** (database 3, alongside the staleness flag). The API writes the content on
+upload; the worker reads it on each download job and writes a local writable copy for
+yt-dlp. No configuration or shared volume is required — the API and worker pods reach
+the same Valkey instance.
 
 | Name | Default | Description |
 |---|---|---|
-| `cookies.dir` | `"/var/zimmporter/cookies"` | API-side mount path (writable, holds `cookies.txt`) |
-| `cookies.workerMountPath` | `"/etc/zimmporter/cookies"` | Worker-side mount path (read-only) |
-| `cookies.filename` | `"cookies.txt"` | Cookie file name inside the shared volume |
-| `cookies.hostPath` | `""` | Host directory to use as a shared volume (single-node clusters without an RWX StorageClass); created with `DirectoryOrCreate` when set |
-| `cookies.persistence.enabled` | `true` | Create a PVC for the shared cookies volume (ignored when `hostPath` is set) |
-| `cookies.persistence.storageClass` | `""` | PVC storage class (default cluster `StorageClass` when empty) |
-| `cookies.persistence.accessModes` | `["ReadWriteMany"]` | PVC access modes — must support shared mounts |
-| `cookies.persistence.size` | `"1Gi"` | PVC size |
-
-The default PVC backend requires a `StorageClass` with `ReadWriteMany` access
-(or a provider supporting shared volumes). On single-node clusters that only
-expose an RWO `StorageClass` (e.g. k3s `local-path`), set `cookies.hostPath`
-and `cookies.persistence.enabled: false` instead — the API and worker pods run
-on the same node and share the host directory.
+| *(none)* | — | No cookie-specific values; content lives in Valkey under `zimmporter:cookies:content` / `zimmporter:cookies:meta` |
 
 ### Private CA
 
@@ -397,14 +383,13 @@ frontend:
 
 | Kind | Name pattern | Notes |
 |---|---|---|
-| `Deployment` | `{release}-zimmporter-api` | FastAPI, `/health` probe, writable cookies volume at `/var/zimmporter/cookies`; also runs the periodic library index dispatcher (`api.indexIntervalMinutes`) |
-| `Deployment` | `{release}-zimmporter-worker` | Celery, `emptyDir` at `/data/zimmer/importer`, `inspect ping` probe, read-only cookies volume |
+| `Deployment` | `{release}-zimmporter-api` | FastAPI, `/health` probe; also runs the periodic library index dispatcher (`api.indexIntervalMinutes`) |
+| `Deployment` | `{release}-zimmporter-worker` | Celery, `emptyDir` at `/data/zimmer/importer`, `inspect ping` probe |
 | `Deployment` (conditional) | `{release}-zimmporter-bgutil-provider` | POT provider, `/ping` probe; skipped when `potProvider.enabled=false` |
 | `Deployment` | `{release}-zimmporter-frontend` | Next.js, HTTP probe on `/` |
 | `StatefulSet` (conditional) | `{release}-zimmporter-valkey` | Skipped when `valkey.external.enabled=true` |
 | `StatefulSet` (conditional) | `{release}-zimmporter-mariadb` | Skipped when `mariadb.external.enabled=true` |
 | `Service` (×4–6) | ClusterIP for each component | Valkey + MariaDB skipped when external |
-| `PersistentVolumeClaim` (conditional) | `{release}-zimmporter-cookies` | Shared RWX volume; skipped when `cookies.persistence.enabled=false` |
 | `Ingress` (×2) | Only when enabled | Separate hostnames for API and frontend |
 | `ConfigMap` (×3) | `*-api-config`, `*-worker-config`, `*-frontend-config` | Non-sensitive environment variables |
 | `Secret` (conditional) | `*-database` | Skipped when `database.existingSecret` is set |
@@ -567,8 +552,8 @@ chart skips creating its own Secret and uses yours directly.
 helm uninstall my-release
 ```
 
-Persistent volume claims for Valkey, MariaDB, and cookies are **not** deleted by
-default. Remove them manually if needed:
+Persistent volume claims for Valkey and MariaDB are **not** deleted by default.
+Remove them manually if needed:
 
 ```bash
 kubectl delete pvc -l app.kubernetes.io/instance=my-release

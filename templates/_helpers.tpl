@@ -168,7 +168,3 @@ app.kubernetes.io/component: bgutil-provider
 {{- define "zimmporter.potProviderUrl" -}}
 {{- printf "http://%s-bgutil-provider:%s" (include "zimmporter.fullname" .) (.Values.potProvider.port | toString) }}
 {{- end }}
-
-{{- define "zimmporter.cookiesVolumeName" -}}
-{{- include "zimmporter.fullname" . }}-cookies
-{{- end }}

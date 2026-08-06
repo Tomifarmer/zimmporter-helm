@@ -109,8 +109,6 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - name: cookies
-              mountPath: {{ .Values.cookies.dir | quote }}
           {{- if and .Values.caCert.enabled .Values.caCert.existingConfigMap }}
             - name: ca-cert
               mountPath: {{ .Values.caCert.path | quote }}
@@ -149,19 +147,6 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-        {{- if .Values.cookies.hostPath }}
-        - name: cookies
-          hostPath:
-            path: {{ .Values.cookies.hostPath | quote }}
-            type: DirectoryOrCreate
-        {{- else if .Values.cookies.persistence.enabled }}
-        - name: cookies
-          persistentVolumeClaim:
-            claimName: {{ include "zimmporter.cookiesVolumeName" . }}
-        {{- else }}
-        - name: cookies
-          emptyDir: {}
-        {{- end }}
         {{- if and .Values.caCert.enabled .Values.caCert.existingConfigMap }}
         - name: ca-cert
           configMap:

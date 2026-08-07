@@ -35,6 +35,10 @@ data:
   AWS_USE_SSL: {{ .Values.s3.useSSL | toString | quote }}
   AWS_BUCKET: {{ .Values.s3.bucket | quote }}
   NAVIDROME_URL: {{ .Values.navidrome.url | quote }}
+  ENABLE_LYRICS: {{ .Values.lyrics.enabled | quote }}
+  {{- if .Values.lyrics.baseUrl }}
+  LRCLIB_BASE_URL: {{ .Values.lyrics.baseUrl | quote }}
+  {{- end }}
   {{- if .Values.potProvider.enabled }}
   POT_PROVIDER_URL: {{ include "zimmporter.potProviderUrl" . | quote }}
   {{- end }}

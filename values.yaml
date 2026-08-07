@@ -225,6 +225,13 @@ celery:
   broker: ""
   backend: ""
 
+# ── Lyrics (LRCLIB sync lyrics embedded into downloads) ─────────────
+lyrics:
+  # Disable to skip synced-lyrics lookups entirely during downloads.
+  enabled: true
+  # Optional LRCLIB API override (e.g. a self-hosted mirror / proxy).
+  baseUrl: ""
+
 # ── BgUtils POT provider (yt-dlp PO tokens) ─────────────────────────
 potProvider:
   enabled: true

@@ -266,6 +266,13 @@ read from the secret's `user` key.
 | `celery.broker` | `""` | Broker URL (auto-derived from in-cluster Valkey when empty) |
 | `celery.backend` | `""` | Result backend URL (auto-derived from in-cluster Valkey when empty) |
 
+### Lyrics (LRCLIB)
+
+| Name | Default | Description |
+|---|---|---|
+| `lyrics.enabled` | `true` | Enable synced (LRC) lyrics lookup during downloads (worker `ENABLE_LYRICS`) |
+| `lyrics.baseUrl` | `""` | Optional LRCLIB API override (worker `LRCLIB_BASE_URL`); empty uses the public `https://lrclib.net/api` |
+
 ### POT provider (bgutil-provider)
 
 The chart deploys the [BgUtils yt-dlp POT provider](https://github.com/Brainicism/bgutil-ytdlp-pot-provider)

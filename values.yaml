@@ -79,6 +79,7 @@ api:
     CORS_ALLOWED_ORIGINS: "*"
     OIDC_ISSUER_URL: ""
     API_PROXY_FETCH: "false"
+    JOB_ADMIN_GROUPS: ""
   # Which library sources feed the `available_albums` index:
   # "s3" (default), "navidrome", or "both".
   indexSource: s3

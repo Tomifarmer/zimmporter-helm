@@ -274,6 +274,13 @@ read from the secret's `user` key.
 | `lyrics.enabled` | `true` | Enable synced (LRC) lyrics lookup during downloads (worker `ENABLE_LYRICS`) |
 | `lyrics.baseUrl` | `""` | Optional LRCLIB API override (worker `LRCLIB_BASE_URL`); empty uses the public `https://lrclib.net/api` |
 
+### Genre (iTunes)
+
+| Name | Default | Description |
+|---|---|---|
+| `genre.enabled` | `true` | Enable iTunes album-genre lookup during downloads (worker `ENABLE_GENRE`) |
+| `genre.lookupLimit` | `3` | Number of candidate albums to inspect per genre lookup (worker `ITUNES_LOOKUP_LIMIT`) |
+
 ### POT provider (bgutil-provider)
 
 The chart deploys the [BgUtils yt-dlp POT provider](https://github.com/Brainicism/bgutil-ytdlp-pot-provider)

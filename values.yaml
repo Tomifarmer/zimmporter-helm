@@ -233,6 +233,13 @@ lyrics:
   # Optional LRCLIB API override (e.g. a self-hosted mirror / proxy).
   baseUrl: ""
 
+# ── Genre (iTunes album genre embedded into downloads) ──────────────
+genre:
+  # Disable to skip iTunes album-genre lookups during downloads.
+  enabled: true
+  # Number of candidate albums to inspect per genre lookup.
+  lookupLimit: 3
+
 # ── BgUtils POT provider (yt-dlp PO tokens) ─────────────────────────
 potProvider:
   enabled: true

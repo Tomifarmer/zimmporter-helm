@@ -40,6 +40,8 @@ data:
   {{- if .Values.lyrics.baseUrl }}
   LRCLIB_BASE_URL: {{ .Values.lyrics.baseUrl | quote }}
   {{- end }}
+  ENABLE_GENRE: {{ .Values.genre.enabled | quote }}
+  ITUNES_LOOKUP_LIMIT: {{ .Values.genre.lookupLimit | toString | quote }}
   {{- if .Values.potProvider.enabled }}
   POT_PROVIDER_URL: {{ include "zimmporter.potProviderUrl" . | quote }}
   {{- end }}
